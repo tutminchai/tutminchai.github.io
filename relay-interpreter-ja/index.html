@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#122d52">
 <title>雙聲 Relay｜中日有聲口譯</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%231a4ec1'/%3E%3Cpath d='M9 18v5m5-11v16m6-22v26m6-21v16m5-12v7' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="../relay-interpreter/style.css?v=3"><link rel="stylesheet" href="japanese.css"><script src="app.js" defer></script>
+<link rel="stylesheet" href="../relay-interpreter/style.css?v=3"><link rel="stylesheet" href="japanese.css"><script src="app.js?v=2" defer></script>
 </head>
 <body>
 <svg class="defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
@@ -56,7 +56,7 @@
 <h3>中日雙向有聲對話</h3><p>點「開始中文對話」或「日本語から」，說完一句後稍作停頓。朗讀期間麥克風會暫停，譯音播完後自動換另一種語言收音。點「結束對話」即可停止。想再聽一次時，點字幕下方的「重播」。</p>
 <h3 lang="ja">日本語で使うには</h3><p lang="ja">「日本語から」を押して話してください。訳文の読み上げが終わると、相手が中国語で話せます。「終了」で会話を終えます。</p>
 <h3>連續字幕</h3><p>講者要連續發言時，選「連續字幕」。這個模式固定發言語言並關閉自動朗讀，適合演講與投影。停止收音後可重播最後一句。</p>
-<h3>聲音設定</h3><p>朗讀使用本機或瀏覽器提供的日文與中文語音。若裝置缺少語音，可在系統的文字轉語音設定中安裝日文或中文，再回來重播。</p>
+<h3>聲音設定</h3><p>優先使用裝置的日文與中文語音。若系統無法朗讀，網頁會下載備用語音資料，在裝置上產生聲音。第一次使用可能需要等幾秒。備用朗讀使用 <a href="https://github.com/Spelling-Creator/spellophone" target="_blank" rel="noopener">Spellophone / eSpeak NG</a>。</p>
 <h3>收音與資料</h3><p>建議在手機瀏覽器直接開啟並允許麥克風。無法收音時，可選「文字輸入」使用鍵盤或手機聽寫。瀏覽器可能將聲音送至其語音服務，原文會送至 MyMemory。本站的對話紀錄只在本頁暫存，重新整理後即清除。免費翻譯有每日用量限制。</p></dialog>
 <dialog id="stage"><div class="stage-head"><span>雙聲 Relay · 中日字幕</span><button id="closeStage" class="quiet"><svg><use href="#i-x"/></svg>關閉</button></div><div class="stage-body" aria-live="polite"><span id="stageLang"></span><p id="stageTarget"></p><small id="stageSource"></small></div><div class="stage-foot"><span id="stageState"></span><button id="stageMic" class="quiet">開始收音</button></div></dialog>
 </body></html>

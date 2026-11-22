@@ -13,7 +13,10 @@ let pendingMic = null, micVerified = false, retrySpeechDirectly = false;
 let micState = '', savedAuto = true, draft = null, keyboardLive = false, showStageOnStart = false;
 const jobs = [], records = [];
 const targetOf = src => src === 'zh' ? 'ja' : 'zh';
-const hasVoice = !!(synthesis && window.SpeechSynthesisUtterance);
+const hasNativeVoice = !!(synthesis && window.SpeechSynthesisUtterance);
+const AudioOutput=window.AudioContext || window.webkitAudioContext;
+const hasVoice=hasNativeVoice || !!AudioOutput;
+let outputContext=null, backupEngine=null, japaneseReader=null;
 const timeFormat = new Intl.DateTimeFormat('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false});
 function drawSignal(){
   const svg=$('signal'), ns='http://www.w3.org/2000/svg';
@@ -100,37 +103,91 @@ function chooseVoice(language){
   const preferred=language==='ja-JP'?/^ja(?:-|$)/i:/^(?:cmn|zh-(?:Hant|TW|CN|SG)|zh$)/i;
   return voices.find(v=>preferred.test(v.lang.replaceAll('_','-')));
 }
+function prepareOutput(){
+  if(!AudioOutput)return;
+  try{
+    outputContext ||= new AudioOutput();
+    if(outputContext.state!=='running')outputContext.resume().catch(()=>{});
+  }catch{}
+}
+async function pronunciation(text){
+  if(!/\p{Script=Han}/u.test(text))return text;
+  japaneseReader ||= import('https://cdn.jsdelivr.net/npm/kuroshiro-analyzer-kuromoji@2.0.0-beta.3/dist/kuroshiro-analyzer-kuromoji.mjs')
+    .then(async module=>{
+      const reader=new module.default({dictPath:'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/'});
+      await reader.init();return reader;
+    }).catch(error=>{japaneseReader=null;throw error});
+  const reader=await japaneseReader, tokens=await reader.parse(text);
+  return tokens.map(token=>token.pronunciation || token.reading || token.surface_form).join('');
+}
+async function generateSpeech(text,language){
+  const root='https://cdn.jsdelivr.net/npm/@spelling-creator/spellophone@0.2.1/';
+  backupEngine ||= import(root+'dist/browser.js').then(module=>module.createEspeak({
+    dataUrl:root+'espeak-ng-data/',wasmUrl:root+'wasm/espeak-ng.wasm',languages:['en','ja','cmn']
+  })).catch(error=>{backupEngine=null;throw error});
+  const [engine,spoken]=await Promise.all([backupEngine,language==='ja'?pronunciation(text):text]);
+  engine.setVoice(language==='ja'?'ja':'cmn');
+  return engine.synthesize(spoken);
+}
 function readAloud(row){
   if(!row?.translation || !hasVoice || listening || engine)return Promise.resolve('failed');
   cancelVoice();
-  const language=langs[targetOf(row.src)];
+  const dest=targetOf(row.src), language=langs[dest];
   return new Promise(resolve=>{
-    const utterance=new SpeechSynthesisUtterance(row.translation);
-    const voice=chooseVoice(language.speech);
-    if(voice)utterance.voice=voice;
-    utterance.lang=language.speech;utterance.rate=.96;
-    let timeout=null;
-    const current={utterance,finish};playback=current;
+    let timeout=null, node=null, utterance=null, usingBackup=false;
+    const current={finish};playback=current;
+    function detachNative(){
+      if(!utterance)return;
+      utterance.onstart=utterance.onend=utterance.onerror=null;
+    }
     function finish(result){
       if(playback!==current)return;
-      playback=null;speaking=false;clearTimeout(timeout);
-      utterance.onstart=utterance.onend=utterance.onerror=null;
+      playback=null;speaking=false;clearTimeout(timeout);detachNative();
+      if(node){
+        node.onended=null;
+        if(result!=='done'){try{node.stop()}catch{}}
+        node.disconnect();
+      }
       if(result==='failed'){
-        synthesis.cancel();
+        synthesis?.cancel();
         notice('裝置未能播放'+language.short+'。請點「重播」，或檢查系統的'+language.short+'語音。');
       }else if(result==='done')notice('譯音播放完畢');
       controls();resolve(result);
     }
-    timeout=setTimeout(()=>finish('failed'),6500);
+    async function fallback(){
+      if(playback!==current || usingBackup)return;
+      usingBackup=true;clearTimeout(timeout);detachNative();synthesis?.cancel();
+      if(!outputContext || outputContext.state!=='running'){finish('failed');return}
+      timeout=setTimeout(()=>finish('failed'),45000);
+      notice('正在準備'+language.short+'備用語音…');
+      try{
+        const {samples,sampleRate}=await generateSpeech(row.translation,dest);
+        if(playback!==current)return;
+        if(!samples?.length || !samples.some(sample=>Math.abs(sample)>8))throw Error('No speech samples');
+        const buffer=outputContext.createBuffer(1,samples.length,sampleRate);
+        buffer.copyToChannel(Float32Array.from(samples,sample=>sample/32768),0);
+        node=outputContext.createBufferSource();node.buffer=buffer;node.connect(outputContext.destination);
+        node.onended=()=>finish('done');
+        clearTimeout(timeout);timeout=setTimeout(()=>finish('failed'),buffer.duration*1000+4000);
+        notice('正在朗讀'+language.short+' · 備用語音');node.start();
+      }catch{finish('failed')}
+    }
+    speaking=true;controls();
+    if(!hasNativeVoice){fallback();return}
+    utterance=new SpeechSynthesisUtterance(row.translation);
+    const voice=chooseVoice(language.speech);
+    if(voice)utterance.voice=voice;
+    utterance.lang=language.speech;utterance.rate=.96;
+    current.utterance=utterance;
+    timeout=setTimeout(fallback,4500);
     utterance.onstart=()=>{
       if(playback!==current)return;
       clearTimeout(timeout);
       timeout=setTimeout(()=>finish('failed'),Math.max(15000,utterance.text.length*550+6000));
       notice('正在朗讀'+language.short);
     };
-    utterance.onend=()=>finish('done');utterance.onerror=()=>finish('failed');
-    speaking=true;controls();
-    try{synthesis.speak(utterance)}catch{finish('failed')}
+    utterance.onend=()=>finish('done');utterance.onerror=fallback;
+    try{synthesis.speak(utterance)}catch{fallback()}
   });
 }
 function splitSegments(text){
@@ -437,6 +494,7 @@ function micAction(){
   if(engine || (processing && mode==='chat'))return;
   const blocked=captureRestriction();
   if(blocked || !Recognition){showRecovery(blocked || 'unsupported');return}
+  if($('auto').checked)prepareOutput();
   resetKeyboard();cancelVoice();$('micHelp').hidden=true;
   if(mode==='chat'){relayActive=true;relayId++}
   showStageOnStart=mode==='live' && window.matchMedia('(max-width: 780px)').matches && !$('stage').open;
@@ -455,9 +513,9 @@ $('otherStart').onclick=()=>{if(relayActive || listening || engine || processing
 $('modeChat').onclick=()=>setMode('chat');$('modeLive').onclick=()=>setMode('live');
 $('swap').onclick=()=>{resetKeyboard();cancelVoice();from=targetOf(from);micState='';last=null;display();notice('已交換語言')};
 $('auto').onchange=()=>{if(!$('auto').checked)cancelVoice()};
-$('play').onclick=()=>speaking?cancelVoice():readAloud(last);
+$('play').onclick=()=>{if(speaking){cancelVoice();return}prepareOutput();readAloud(last)};
 $('key').onclick=()=>{if($('textForm').hidden)openText();else{stopKeyboard();redraw()}};
-$('textForm').onsubmit=e=>{e.preventDefault();const s=$('typed').value.trim();if(!s || listening || engine || processing)return;cancelVoice();enqueue(s,from);$('typed').value=''};
+$('textForm').onsubmit=e=>{e.preventDefault();const s=$('typed').value.trim();if(!s || listening || engine || processing)return;if($('auto').checked)prepareOutput();cancelVoice();enqueue(s,from);$('typed').value=''};
 $('clear').onclick=()=>{resetKeyboard();cancelVoice();records.length=0;last=null;renderHistory();display();notice('已清除本次紀錄')};
 $('expand').onclick=()=>$('stage').showModal();$('closeStage').onclick=()=>$('stage').close();
 $('help').onclick=()=>$('guide').showModal();$('closeHelp').onclick=()=>$('guide').close();
