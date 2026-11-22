@@ -1,0 +1,7 @@
+:root{--blue:#974153;--ink:#2f2b39;--muted:#635f70;--edge:#e3dce1}
+body{background:#f7f5f4}
+.brand-mark,.primary{background:#903f50}.tile{background:#f6eaf0;color:#954458}.tabs{background:#eeeaed;border-color:#e2dade}.pair{background:#faf7f8;border-color:#e7dfe3}
+.targetbox{background:#fcf0f3;border-color:#ead7de}.targetbox .langlabel,.targetbox p,.record .translated{color:#82394c}.targetbox p.placeholder{color:#876572}.switchlabel input:checked+.switch{background:#974153}
+.console{background:linear-gradient(110deg,#30293f,#4b354c 58%,#483449)}.console-heading,.console-action small{background:#342b41d9}.console button{color:#6d3349}.console button:hover:not(:disabled){background:#fbecf2}
+.start-actions{display:flex;align-items:center;justify-content:center;gap:8px}.console #otherStart{background:#392d45ed;border:1px solid #cdb6cd;color:#fff;min-height:44px}.console #otherStart:hover{background:#51425c}
+@media(max-width:420px){.start-actions button{font-size:.9rem;padding:0 13px}.intro p{font-size:.92rem}.tabs button{font-size:.86rem}}
