@@ -63,6 +63,10 @@ function showWork(film, playNow) {
       'work-description': film.description, 'work-meta': [film.category, film.format, film.duration].join('　／　')
     };
     Object.entries(content).forEach(([id, value]) => document.getElementById(id).textContent = value);
+    const youtubeLink = document.getElementById('work-youtube');
+    youtubeLink.hidden = !film.youtube;
+    if (film.youtube) youtubeLink.href = film.youtube;
+    else youtubeLink.removeAttribute('href');
     player.pause();
     player.poster = 'assets/' + film.id + '-screen.webp';
     player.src = 'assets/' + film.id + '.mp4';

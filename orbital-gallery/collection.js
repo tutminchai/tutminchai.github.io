@@ -24,10 +24,11 @@ const films = [
     description: '十秒的推進鏡頭搭配電子氛圍配樂。畫面為三面各 1920 × 1080 的牆重新安排構圖；網頁播放保留全寬比例的橫幅版本，可同時看見左、中、右三個方向。'
   },
   {
-    id: 'sunset', title: '追著夕陽的路', english: 'Chasing the Sunset', category: '公路', duration: '00:24', format: '三面牆與地板空間模擬',
+    id: 'sunset', title: '追著夕陽的路', english: 'Chasing the Sunset', category: '公路', duration: '00:24', format: '展間入口全景・三面牆與地板',
     short: '迎著低垂的夕陽，看路旁樹影向兩側退去。',
     concept: '夕陽像一個一直留在遠方的目的地。讓道路朝著它延伸，再以行道樹、路燈和地面標線的位移，寫出黃昏路上持續前行的感覺。',
-    description: '車道從正前方延展至腳下，鏡頭沿路向前。路面與兩側景物以不同速度移過視野，空間模擬可看見道路如何從正面牆一路接到地板。'
+    description: '從展間入口往裡看，正面牆上的道路朝夕陽延伸，行道樹沿兩側牆面向後掠過。雙黃線從正面牆接到地板。鏡頭固定在入口，可以同時看到三面牆與地板的投影。配樂以 Suno 製作。',
+    youtube: 'https://www.youtube.com/watch?v=7XzFa6WhoGI'
   },
   {
     id: 'highway', title: '晴日國道', english: 'Highway in Daylight', category: '公路', duration: '00:24', format: '三面牆空間模擬',
