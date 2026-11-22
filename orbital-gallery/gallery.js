@@ -12,13 +12,17 @@ let currentFilm;
 let currentTheme = themes[0];
 
 const clock = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg>';
+function assetUrl(film, suffix) {
+  const version = film.assetVersion ? '?v=' + film.assetVersion : '';
+  return 'assets/' + film.id + suffix + version;
+}
 function showCollection(theme) {
   currentTheme = theme;
   const selection = theme === themes[0] ? films : films.filter(film => film.category === theme);
   for (const button of filters.children) button.setAttribute('aria-pressed', String(button.textContent === theme));
   grid.innerHTML = selection.map((film, index) =>
     `<a class="film-card" href="#work/${film.id}" aria-label="觀看《${film.title}》">
-      <div class="thumb"><img src="assets/${film.id}.webp" width="960" height="540" alt="" loading="${index < 3 ? 'eager' : 'lazy'}">
+      <div class="thumb"><img src="${assetUrl(film, '.webp')}" width="960" height="540" alt="" loading="${index < 3 ? 'eager' : 'lazy'}">
         <span class="thumb-play" aria-hidden="true"></span><span class="duration">${clock}${film.duration}</span></div>
       <div class="card-label">${film.category}</div><h3>${film.title}</h3><p>${film.short}</p>
     </a>`).join('');
@@ -68,8 +72,8 @@ function showWork(film, playNow) {
     if (film.youtube) youtubeLink.href = film.youtube;
     else youtubeLink.removeAttribute('href');
     player.pause();
-    player.poster = 'assets/' + film.id + '-screen.webp';
-    player.src = 'assets/' + film.id + '.mp4';
+    player.poster = assetUrl(film, '-screen.webp');
+    player.src = assetUrl(film, '.mp4');
     player.setAttribute('aria-label', film.title + '，' + film.format);
     document.title = film.title + '｜星間映廊';
   }
