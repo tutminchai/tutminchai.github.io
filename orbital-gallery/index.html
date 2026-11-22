@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0c12">
+<meta name="description" content="謝旻儕的沉浸式影像作品集。走進三面牆投影的星空、山林與旅途，觀看八件作品及其創作理念。">
+<title>星間映廊｜謝旻儕的沉浸式影像作品集</title>
+<link rel="icon" href="assets/orbit.svg" type="image/svg+xml">
+<link rel="stylesheet" href="gallery.css">
+<script defer src="collection.js"></script>
+<script defer src="gallery.js"></script>
+</head>
+<body>
+<a class="skip" href="#collection">跳至作品展廊</a>
+<header class="mast" id="home">
+  <div class="wrap mast-in">
+    <a href="#home" class="brand" aria-label="星間映廊首頁">
+      <img src="assets/orbit.svg" width="44" height="44" alt="">
+      <span><b>星間映廊</b><small>ORBITAL GALLERY</small></span>
+    </a>
+    <nav aria-label="網站導覽"><a class="active" href="#home">首頁</a><a href="#collection">作品展廊</a><a href="#about">關於創作</a></nav>
+    <button class="fullscreen-btn" type="button" aria-label="進入全螢幕" title="進入全螢幕" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/></svg></button>
+  </div>
+</header>
+<main>
+<section class="hero" aria-labelledby="hero-title">
+  <picture id="hero-art"><source media="(max-width: 640px)" srcset="assets/gallery-hero-small.webp"><img src="assets/gallery-hero.webp" alt="" fetchpriority="high" width="1672" height="941"></picture>
+  <div class="wrap hero-in">
+    <div class="hero-copy">
+      <p class="kicker hero-kicker"><span></span>IMMERSIVE FILM PORTFOLIO</p>
+      <h1 id="hero-title">沉浸式<br>影像作品集</h1>
+      <p class="intro">沿著光的軌跡，從星海走進山林。<br>在三面牆之間，觀看風景如何成為空間。</p>
+      <div class="hero-actions">
+        <a class="primary" href="#collection"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"/><rect x="14" y="14" width="6.5" height="6.5" rx="1"/></svg>瀏覽作品</a>
+        <a class="play-link" id="featured-watch" href="#work/cosmos"><span class="round-play" aria-hidden="true"></span>觀看精選</a>
+      </div>
+    </div>
+    <div class="feature-nav" aria-label="首頁精選作品">
+      <div class="feature-name"><span class="feature-star">✧</span><span>精選映像</span><i></i><strong id="featured-name">宇宙穿越</strong></div>
+      <div class="feature-dots" role="group" aria-label="切換精選映像"></div>
+    </div>
+  </div>
+</section>
+<section class="wrap collection" id="collection" aria-labelledby="collection-title">
+  <div class="section-top"><div><p class="kicker"><span></span>FILM ARCHIVE</p><h2 id="collection-title">作品展廊</h2></div>
+    <div class="filters" role="group" aria-label="依作品主題篩選"></div>
+  </div>
+  <p id="filter-status" class="sr" role="status"></p>
+  <div class="cards" id="film-cards"></div>
+</section>
+<section id="about" class="about" aria-labelledby="about-title">
+  <div class="wrap about-inner">
+    <figure><img src="assets/cedar-screen.webp" width="960" height="540" alt="杉影拾階的石階從正面牆延伸到地板，兩側牆面接續杉林景色" loading="lazy"><figcaption>《杉影拾階》三面牆與地板投影模擬</figcaption></figure>
+    <div><p class="kicker"><span></span>ABOUT THE COLLECTION</p><h2 id="about-title">關於創作</h2>
+      <p>在正面牆上，石階通往林間的鳥居。轉向側牆，兩旁的杉木沿著步伐向後移動。低頭時，下一階已經來到腳邊。《杉影拾階》從這段路出發，嘗試讓整個房間都參與一次登山的經驗。</p>
+      <p>星間映廊收錄謝旻儕的沉浸式影像創作。展廊中的空間模擬保留牆角與地面的交界，全景作品則保留橫幅比例，讓觀者在一般螢幕上也能讀到原本的構圖。</p>
+      <div class="signature"><b>謝旻儕</b><span>台南應用科技大學 多媒體動畫系</span></div>
+    </div>
+  </div>
+</section>
+</main>
+<footer><div class="wrap"><a class="footer-mark" href="#home"><img src="assets/orbit.svg" width="26" height="26" alt="">星間映廊</a><span>© 2026 謝旻儕</span></div></footer>
+<dialog id="work-dialog" aria-labelledby="work-name"><article class="work-panel">
+  <div class="dialog-bar"><span class="kicker"><span></span>作品放映室</span><button type="button" class="close-btn" aria-label="關閉作品"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+  <div class="player"><video controls playsinline preload="metadata" id="work-video" aria-label="作品影片"></video></div>
+  <div class="work-text"><p class="work-meta" id="work-meta"></p><h2 id="work-name"></h2><p class="work-en" lang="en" id="work-en"></p>
+    <div class="notes"><section><h3>創作理念</h3><p id="work-concept"></p></section><section><h3>作品敘述</h3><p id="work-description"></p></section></div>
+  </div>
+</article></dialog>
+<noscript><p class="wrap">請啟用 JavaScript 以瀏覽作品及播放影片。</p></noscript>
+</body></html>
