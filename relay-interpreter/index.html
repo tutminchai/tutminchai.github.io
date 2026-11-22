@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#122d52">
+<title>雙聲 Relay｜中英現場口譯</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%231a4ec1'/%3E%3Cpath d='M9 18v5m5-11v16m6-22v26m6-21v16m5-12v7' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css?v=3"><script src="app.js?v=3" defer></script>
+</head>
+<body>
+<svg class="defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+<symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 10v4m5-8v12m5-16v20m5-16v12m5-8v4"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-9v.1"/></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2m-7 9v3m-4 0h8"/></symbol>
+<symbol id="i-swap" viewBox="0 0 24 24"><path d="M3 8h17m-4-4 4 4-4 4M21 16H4m4 4-4-4 4-4"/></symbol>
+<symbol id="i-typing" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M6 9h.1m3.8 0h.1m3.8 0h.1m3.8 0h.1M7 12h.1m3.9 0h.1m3.9 0h.1m-6.6 3h7"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path d="M17 10a6 6 0 0 1-6 6H7l-4 3v-5a7 7 0 1 1 14-4Z"/><path d="M19 8a6 6 0 0 1 2 8v4l-3-2h-3"/></symbol>
+<symbol id="i-screen" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="14" rx="2"/><path d="M8 21h8m-4-3v3M6 12h5m2 0h5m-12 3h8"/></symbol>
+<symbol id="i-expand" viewBox="0 0 24 24"><path d="M3 9V3h6m6 0h6v6m0 6v6h-6m-6 0H3v-6"/></symbol>
+<symbol id="i-volume" viewBox="0 0 24 24"><path d="m3 9 5 0 5-4v14l-5-4H3zm13-1a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="i-captions" viewBox="0 0 24 24"><path d="M4 3.5h16a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H9L4 22v-3.5A1.5 1.5 0 0 1 2.5 17V5A1.5 1.5 0 0 1 4 3.5Z"/><path d="M7 9h10M7 13h6"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></symbol>
+</defs></svg>
+<header><div class="nav"><div class="brand"><span class="brand-mark"><svg><use href="#i-wave"/></svg></span>雙聲<span class="relay">Relay</span></div>
+<button class="quiet" id="help"><svg><use href="#i-info"/></svg>使用說明</button></div></header>
+<main>
+<section class="intro"><div><h1>現場口譯工作台<span class="title-dot">.</span></h1><p>點一次開始，說話時就能看雙語字幕。</p></div>
+<div class="tabs" aria-label="口譯模式" role="group"><button id="modeLive" aria-pressed="true"><svg><use href="#i-screen"/></svg>即時字幕</button><button id="modeChat" aria-pressed="false"><svg><use href="#i-chat"/></svg>雙向對話</button></div></section>
+<section class="desk">
+<div class="card input">
+<h2><span class="tile"><svg><use href="#i-mic"/></svg></span>語音輸入</h2>
+<div class="pair"><div><small>發言語言</small><b id="from">繁體中文</b></div><button id="swap" title="交換發言與翻譯語言 / Swap languages" aria-label="交換語言 / Swap languages"><svg><use href="#i-swap"/></svg></button><div><small>翻譯語言</small><b id="to" lang="en">English</b></div></div>
+<div class="console" id="console"><svg class="signal" viewBox="0 0 600 120" preserveAspectRatio="none" aria-hidden="true" id="signal"></svg>
+<div class="console-heading"><span class="radio-dot"></span><span id="state" role="status">麥克風待命</span></div>
+<div class="console-action"><button id="mic"><svg><use href="#i-mic"/></svg><span id="micLabel">開始即時翻譯</span></button>
+<small id="micHint">允許麥克風後，直接說中文。</small></div></div>
+<section id="micHelp" class="mic-help" aria-label="麥克風協助" hidden><strong id="micProblem">請開啟麥克風權限</strong>
+<p id="micAdvice"></p><div class="recovery-actions"><a id="external" target="_blank" rel="noopener" href="https://tutminchai.github.io/relay-interpreter/">在瀏覽器開啟</a><button type="button" id="copyUrl">複製網址</button><button type="button" id="dictate">用鍵盤語音輸入</button></div><small id="copyStatus" role="status"></small></section>
+<div class="input-tools"><button id="key" class="textbtn" aria-expanded="false" aria-controls="textForm"><svg><use href="#i-typing"/></svg>文字輸入</button>
+<label class="switchlabel"><span>自動朗讀</span><input type="checkbox" id="auto"><span class="switch"></span></label></div>
+<form id="textForm" hidden><label for="typed" id="typeLabel">輸入中文原文</label><button type="button" id="keyboardLive" class="textbtn">開啟鍵盤語音即時字幕</button><p id="dictateHint" hidden>點手機鍵盤的麥克風開始說話，辨識文字會自動送出翻譯。點「完成這句」即可存入本次紀錄。</p><textarea id="typed" maxlength="1600" rows="3" placeholder="請輸入要翻譯的句子"></textarea><button class="primary" type="submit" id="send">翻譯</button></form>
+<p class="disclosure">語音由瀏覽器辨識，即時字幕會將辨識中的片段與完整句子傳給 MyMemory 翻譯。</p>
+</div>
+<div class="card output">
+<div class="card-head"><h2><span class="tile"><svg><use href="#i-captions"/></svg></span>雙語字幕</h2><button class="mini" id="expand" aria-label="放大字幕" title="放大字幕"><svg><use href="#i-expand"/></svg></button></div>
+<div class="bilingual" aria-live="polite" aria-atomic="true"><div class="sourcebox"><div class="langlabel"><span class="line"></span>原文<span id="sourceLang">繁體中文</span></div><p id="source" class="placeholder">等待發言…</p></div>
+<div class="targetbox"><div class="langlabel"><span class="line"></span>譯文<span id="targetLang">English</span></div><p id="target" class="placeholder">Translation will appear here.</p></div></div>
+<div class="output-foot"><small id="notice" role="status">準備就緒</small><button id="play" class="textbtn" disabled><svg><use href="#i-volume"/></svg>朗讀譯文</button></div>
+</div>
+</section>
+<section class="card history"><div class="card-head"><h2><span class="tile"><svg><use href="#i-clock"/></svg></span>本次對話 <span id="count">0</span></h2><button class="quiet" id="clear" disabled>清除紀錄</button></div><div id="history"><p class="empty">完成翻譯後，雙語紀錄會依序出現在這裡。</p></div></section>
+</main>
+<dialog id="guide"><div class="card-head"><h2>使用說明</h2><button id="closeHelp" class="mini" aria-label="關閉說明"><svg><use href="#i-x"/></svg></button></div>
+<h3>兩人面對面交談</h3><p>選「雙向對話」，點「開始收音」，說完一句稍作停頓。換人時點兩種語言中間的交換鍵，再讓對方發言。打開「自動朗讀」即可播放譯文。</p>
+<h3>演講或參訪解說</h3><p>選「即時字幕」，點一次「開始即時翻譯」並允許麥克風，即可連續說話。原文會隨辨識更新，暫譯會隨後出現。部分裝置在停頓後才回傳文字。點字幕右上角可放大顯示，適合搭配投影。此模式會關閉朗讀，避免麥克風收到譯音。</p>
+<h3>收音與資料</h3><p>建議在手機瀏覽器直接開啟並允許麥克風。無法收音時，可選「文字輸入」使用鍵盤或手機聽寫。瀏覽器可能將聲音送至其語音服務，原文會送至 MyMemory。本站的對話紀錄只在本頁暫存，重新整理後即清除。免費翻譯有每日用量限制。</p></dialog>
+<dialog id="stage"><div class="stage-head"><span>雙聲 Relay · 現場字幕</span><button id="closeStage" class="quiet"><svg><use href="#i-x"/></svg>關閉</button></div><div class="stage-body" aria-live="polite"><span id="stageLang"></span><p id="stageTarget"></p><small id="stageSource"></small></div><div class="stage-foot"><span id="stageState"></span><button id="stageMic" class="quiet">開始收音</button></div></dialog>
+</body></html>
