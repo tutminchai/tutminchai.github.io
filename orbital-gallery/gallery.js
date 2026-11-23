@@ -4,7 +4,7 @@ const filters = document.querySelector('.filters');
 const dialog = document.querySelector('#work-dialog');
 const player = document.querySelector('#work-video');
 const closeButton = dialog.querySelector('.close-btn');
-const themes = ['全部作品', '天空與宇宙', '山林', '公路', '靜觀'];
+const themes = ['全部作品', '天空與宇宙', '山林', '公路', '城市', '靜觀'];
 const featured = ['cosmos', 'cedar', 'flight'];
 const byId = new Map(films.map(film => [film.id, film]));
 let lastOpener;
@@ -71,6 +71,17 @@ function showWork(film, playNow) {
     youtubeLink.hidden = !film.youtube;
     if (film.youtube) youtubeLink.href = film.youtube;
     else youtubeLink.removeAttribute('href');
+    const projections = document.getElementById('work-projections');
+    const projectionLinks = film.projectionLinks || [];
+    projections.replaceChildren(...projectionLinks.map(({ label, url }) => {
+      const link = document.createElement('a');
+      link.textContent = label + ' ↗';
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      return link;
+    }));
+    projections.hidden = !projectionLinks.length;
     player.pause();
     player.poster = assetUrl(film, '-screen.webp');
     player.src = assetUrl(film, '.mp4');

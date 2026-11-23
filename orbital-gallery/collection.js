@@ -1,5 +1,16 @@
 const films = [
   {
+    id: 'platform', title: '越過月臺', english: 'Beyond the Platform', category: '城市', duration: '01:08', format: '三面牆與地板空間模擬',
+    short: '從高鐵月臺起飛，越過欄杆，沿林蔭大道向遠方飛行。',
+    concept: '候車時，欄杆把腳下的月臺和遠方的城市分開。作品讓視線跨過這道邊界。近處的樹冠和屋頂迅速移向腳邊，遠處的天際線幾乎留在原地，飛行的高度從這個落差中顯現。',
+    description: '鏡頭從月臺平視起飛，沿街廓上升，最後八秒逐漸減速。站內影片以展間中央的視點呈現三面牆與地板。現場放映時，兩支投影版從 00:00 同步啟動，Suno 配樂由三面牆版播放。',
+    youtube: 'https://youtu.be/vOduOw-6l0I',
+    projectionLinks: [
+      { label: '三面牆投影版（5760 × 1080）', url: 'https://youtu.be/1ZvA17d3A80' },
+      { label: '地板投影版（1080 × 1080，無聲）', url: 'https://youtube.com/shorts/0ivTQCWw_GY' }
+    ]
+  },
+  {
     id: 'torii', title: '星渡風之庭・穿越鳥居', english: 'Beyond the Torii', category: '山林', duration: '01:05', format: '三面牆與地板空間模擬',
     short: '在銀河與雲海交會的山巔，穿過一座鳥居。',
     concept: '鳥居標記了山徑上的一道門檻。把它放在雲海與星空之間，觀者先從遠處辨認它的輪廓，再循著石徑靠近，經過同一片風景的遠景與近景。',

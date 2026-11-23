@@ -13,3 +13,6 @@ dialog{color:var(--ink);background:#141821;border:1px solid #42464f;border-radiu
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 
 #work-youtube:not([hidden]){display:inline-block;margin-top:.7rem;color:var(--gold);text-decoration:underline;text-underline-offset:.2em}
+
+#work-projections:not([hidden]){display:flex;flex-wrap:wrap;gap:.4rem 1rem;margin-top:.6rem}
+#work-projections a{color:var(--gold);text-decoration:underline;text-underline-offset:.2em}
