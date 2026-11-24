@@ -22,7 +22,7 @@ function showCollection(theme) {
   for (const button of filters.children) button.setAttribute('aria-pressed', String(button.textContent === theme));
   grid.innerHTML = selection.map((film, index) =>
     `<a class="film-card" href="#work/${film.id}" aria-label="觀看《${film.title}》">
-      <div class="thumb"><img src="${assetUrl(film, '.webp')}" width="960" height="540" alt="" loading="${index < 3 ? 'eager' : 'lazy'}">
+      <div class="thumb"><img src="${film.cover || assetUrl(film, '.webp')}" width="960" height="540" alt="" loading="${index < 3 ? 'eager' : 'lazy'}">
         <span class="thumb-play" aria-hidden="true"></span><span class="duration">${clock}${film.duration}</span></div>
       <div class="card-label">${film.category}</div><h3>${film.title}</h3><p>${film.short}</p>
     </a>`).join('');
