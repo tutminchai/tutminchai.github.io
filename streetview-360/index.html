@@ -1,0 +1,1289 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f7f3">
+  <meta name="description" content="從 Google 街景網址取得全景，或匯入自己的 360° 照片，選擇畫質後輸出 2:1 JPG。">
+  <title>街景全景下載｜街景 360°</title>
+  <style>
+:root {
+  color-scheme: light;
+  --paper: #f6f6f2;
+  --surface: #fff;
+  --ink: #1c3030;
+  --body: #334645;
+  --muted: #596c68;
+  --line: #d5dcd5;
+  --line-dark: #adbbb3;
+  --accent: #af4028;
+  --accent-dark: #91331f;
+  --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  --sans: "Inter", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  font-family: var(--sans);
+  font-synthesis: none;
+  line-height: 1.5;
+  background: var(--paper);
+  color: var(--ink);
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+button, input, select { font: inherit; color: inherit; }
+button, a, summary, label.secondary, select { -webkit-tap-highlight-color: transparent; }
+button, select { cursor: pointer; }
+button { border: 0; }
+a { color: inherit; }
+button:disabled, select:disabled, input:disabled { cursor: default; }
+button:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible, canvas:focus-visible,
+.file-control:focus-visible + label { outline: 3px solid #bf674c; outline-offset: 3px; }
+.icon-bank { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
+.icon { display: inline-block; width: 20px; height: 20px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.skip { position: fixed; top: -5rem; left: 1rem; z-index: 10; padding: .65rem 1rem; color: white; background: var(--ink); }
+.skip:focus { top: .5rem; }
+.shell { width: min(1180px, calc(100% - clamp(32px, 8vw, 128px))); margin-inline: auto; }
+.sitehead { background: #fafaf7; border-bottom: 1px solid var(--line); }
+.head-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 68px; }
+.wordmark { display: inline-flex; align-items: center; gap: .65rem; font-size: 1.17rem; font-weight: 730; line-height: 1; text-decoration: none; }
+.wordmark b { font-family: var(--mono); font-size: .96em; font-weight: 650; letter-spacing: -.065em; }
+.mark { flex: none; }
+.help-link, .inline-action { display: inline-flex; align-items: center; gap: .42rem; min-height: 40px; text-decoration: none; font-size: .89rem; font-weight: 600; }
+.help-link { color: var(--body); }
+.help-link .icon { width: 17px; height: 17px; }
+.help-link:hover, .inline-action:hover { color: var(--accent); text-decoration: underline; text-underline-offset: .2em; }
+.intro { margin: clamp(32px, 4.8vw, 68px) 0 clamp(24px, 2.8vw, 38px); }
+.intro h1 { margin: 0; font-size: clamp(2.2rem, 4vw, 3.5rem); letter-spacing: -.055em; font-weight: 760; line-height: 1.14; }
+.intro p { margin: .85rem 0 0; color: var(--muted); font-size: 1rem; }
+.workspace { display: grid; grid-template-columns: minmax(290px,.78fr) minmax(0,1.35fr); align-items: start; gap: clamp(18px,2vw,28px); }
+.panel { min-width: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: 0 2px 6px #152c2310; }
+.panel-heading { display: flex; align-items: center; gap: .65rem; }
+.heading-icon { color: var(--accent); width: 22px; height: 22px; }
+.panel h2 { margin: 0; letter-spacing: -.035em; font-size: 1.28rem; line-height: 1.4; font-weight: 700; }
+.controls { padding: clamp(20px,2.15vw,30px); }
+.controls .panel-heading { padding-bottom: 1.3rem; margin-bottom: 1.3rem; border-bottom: 1px solid var(--line); }
+.field-label { display: block; margin: 0 0 .5rem; font-size: .92rem; font-weight: 670; }
+.input-wrap, .select-wrap { position: relative; }
+.input-wrap input, .select-wrap select { width: 100%; min-width: 0; height: 48px; border: 1px solid var(--line-dark); border-radius: 8px; background: #fff; }
+.input-wrap input { padding: 0 45px 0 13px; font-size: .95rem; }
+.input-wrap input::placeholder { color: #74817b; font-size: .9rem; }
+.input-wrap input:hover, .select-wrap select:hover { border-color: #788f84; }
+.paste { position: absolute; inset: 2px 2px 2px auto; width: 42px; display: grid; place-items: center; color: var(--muted); background: transparent; border-radius: 6px; }
+.paste:hover { background: #edf1ea; --icon-bg: #edf1ea; }
+.paste .icon { width: 18px; height: 18px; }
+.field-hint, .rights-note { margin: .55rem 0 0; color: var(--muted); font-size: .835rem; line-height: 1.65; }
+.quality-label { margin-top: 1.4rem; }
+.select-wrap select { appearance: none; padding: 0 40px 0 13px; font-size: .95rem; font-family: var(--mono),var(--sans); font-weight: 550; }
+.select-wrap > .icon { position: absolute; right: 14px; top: 50%; width: 16px; height: 16px; pointer-events: none; transform: translateY(-50%); }
+.primary, .secondary, .save { display: inline-flex; align-items: center; justify-content: center; gap: .52rem; border-radius: 8px; line-height: 1.35; font-weight: 660; }
+.primary { width: 100%; min-height: 49px; margin-top: 1.2rem; padding: .55rem 1rem; background: var(--accent); color: white; font-size: 1rem; }
+.primary:hover:enabled { background: var(--accent-dark); }
+.primary:disabled { background: #916d63; }
+.feedback { color: var(--body); font-size: .895rem; }
+#status { margin: 0; overflow-wrap: anywhere; }
+#status:not(:empty) { margin-top: .75rem; }
+#status.error, #status[data-state="error"], #status[data-type="error"] { color: #a32e25; }
+#progress { display: block; width: 100%; height: 7px; margin: .65rem 0 .25rem; accent-color: var(--accent); }
+.inline-action { padding: 0; border: none; color: var(--body); background: transparent; }
+.inline-action .icon { width: 16px; height: 16px; }
+.alternatives { display: grid; grid-template-columns: 1.27fr 1fr; gap: .55rem; padding-top: 1.1rem; margin-top: 1.25rem; border-top: 1px solid var(--line); }
+.local { position: relative; min-width: 0; }
+.file-control { position: absolute; left: 0; top: 0; opacity: 0; width: 1px; height: 1px; }
+.secondary { width: 100%; min-height: 42px; padding: .45rem .35rem; border: 1px solid var(--line); background: #fafbf8; font-size: .87rem; color: var(--body); cursor: pointer; white-space: nowrap; }
+.secondary .icon { width: 17px; height: 17px; }
+.secondary:hover:enabled, label.secondary:hover { border-color: var(--line-dark); background: #f0f3ec; }
+.secondary:disabled, .file-control:disabled + label { opacity: .52; cursor: default; }
+.rights-note { font-size: .79rem; margin-top: .85rem; }
+.preview { padding: 0; overflow: hidden; }
+.preview-heading { padding: 1.08rem clamp(17px,2vw,26px); }
+.stage { position: relative; isolation: isolate; aspect-ratio: 2.18; width: 100%; min-height: 200px; overflow: hidden; background: #183633; }
+.placeholder, .terrain, #preview-photo, #preview-canvas { display: block; width: 100%; height: 100%; }
+.placeholder, #preview-photo, #preview-canvas { position: absolute; inset: 0; }
+#preview-photo { object-fit: contain; }
+#preview-canvas { cursor: grab; touch-action: none; }
+#preview-canvas:active { cursor: grabbing; }
+.empty-label, .viewer-actions { display: flex; align-items: center; gap: .45rem; font-size: .8rem; color: #fff; }
+.empty-label { position: absolute; bottom: 15px; left: 20px; padding: .33rem .65rem; background: #102b28e8; border: 1px solid #94a89a70; border-radius: 6px; }
+.empty-dot { width: 7px; height: 7px; border: 1px solid #d1dfd2; border-radius: 50%; }
+.viewer-actions { position: absolute; bottom: 12px; right: 12px; z-index: 2; padding: 2px 3px 2px 11px; color: #fff; background: #15332feb; border-radius: 7px; pointer-events: auto; }
+.viewer-actions button { display: flex; align-items: center; gap: .3rem; padding: .42rem .5rem; border-radius: 5px; background: #fff1; color: inherit; font-size: .8rem; font-weight: 600; }
+.viewer-actions button:hover { background: #fff2; }
+.viewer-actions .icon { width: 14px; height: 14px; }
+.preview-footer { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: .65rem .8rem; padding: 1.05rem clamp(17px,2vw,26px) 1.3rem; }
+.file-head { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; grid-column: 1/-1; }
+.file-head h3 { margin: 0; font-size: 1.04rem; line-height: 1.4; font-weight: 690; overflow-wrap: anywhere; }
+.file-head a { min-height: auto; padding: .15rem 0; font-size: .82rem; }
+.specs { margin: 0; display: flex; gap: clamp(16px,2.4vw,35px); flex-wrap: wrap; }
+.specs dt { color: var(--muted); font-size: .77rem; }
+.specs dd { margin: .1rem 0 0; font-family: var(--mono), var(--sans); color: var(--ink); font-size: .9rem; font-weight: 550; }
+.save { min-height: 43px; padding: .62rem 1rem; border: 1px solid var(--ink); background: var(--ink); color: #fff; font-size: .92rem; }
+.save .icon { width: 18px; height: 18px; }
+.save:enabled:hover { background: #344e47; }
+.save:disabled { background: #eff1ec; border-color: #dce2d9; color: #778278; }
+.help { margin: clamp(20px,2.5vw,36px) 0 clamp(30px,5vw,68px); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.help summary { display: flex; align-items: center; gap: .5rem; min-height: 55px; color: var(--body); font-size: .94rem; font-weight: 650; cursor: pointer; list-style: none; }
+.help summary::-webkit-details-marker { display: none; }
+.help summary > .icon { width: 17px; height: 17px; }
+.help summary .expand-icon { margin-left: auto; }
+.help[open] .expand-icon { transform: rotate(180deg); }
+.help-body { max-width: 53rem; padding: 0 .15rem 1rem; color: var(--body); font-size: .93rem; }
+.help-body ol { margin: 0; padding-left: 1.55rem; }
+.help-body p { margin: .7rem 0 0; }
+.help-body li + li { margin-top: .3rem; }
+@media (min-width: 1500px) { .intro { margin-top: 70px; } }
+@media (max-width: 850px) {
+  .shell { width: min(1180px,calc(100% - 44px)); }
+  .workspace { grid-template-columns: minmax(268px,.88fr) minmax(0,1.1fr); gap: 16px; }
+  .preview-footer { grid-template-columns: 1fr; }
+  .save { justify-self: start; }
+  .stage { aspect-ratio: 1.68; }
+}
+@media (max-width: 680px) {
+  .shell { width: min(100% - 32px,540px); }
+  .head-inner { min-height: 58px; }
+  .mark { width: 30px; height: 30px; }
+  .wordmark { font-size: 1.08rem; }
+  .intro { margin: 28px 0 22px; }
+  .intro p { margin-top: .6rem; }
+  .workspace { grid-template-columns: minmax(0,1fr); }
+  .controls { padding: 19px; }
+  .controls .panel-heading { padding-bottom: .9rem; margin-bottom: 1rem; }
+  .quality-label { margin-top: 1rem; }
+  .primary { margin-top: .95rem; }
+  .alternatives { padding-top: .85rem; margin-top: .95rem; }
+  .stage { aspect-ratio: 1.95; min-height: 170px; }
+  .preview-footer { grid-template-columns: 1fr auto; }
+  .preview-heading { padding-block: .9rem; }
+  .specs { gap: .6rem 1.2rem; }
+  .input-wrap input, .select-wrap select { font-size: 1rem; }
+}
+@media (max-width: 380px) {
+  .shell { width: calc(100% - 24px); }
+  .controls { padding: 16px; }
+  .preview-footer { grid-template-columns: 1fr; }
+  .empty-label { bottom: 10px; left: 12px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  button, .secondary, .input-wrap input, .select-wrap select { transition: background-color .16s ease, border-color .16s ease, color .16s ease; }
+}
+
+</style>
+  
+</head>
+<body>
+  <svg class="icon-bank" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4.4" ry="9"/><path d="M3 12h18M5.4 6.2q6.6 4 13.2 0M5.4 17.8q6.6-4 13.2 0"/></symbol>
+      <symbol id="i-question" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 0 1 4.7.7c0 1.8-2.5 2.1-2.5 4.1M12 17h.01"/></symbol>
+      <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="16" rx="2"/><rect fill="var(--icon-bg,#fff)" x="9" y="3" width="6" height="4" rx="1"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+      <symbol id="i-focus" viewBox="0 0 24 24"><path d="M8 4H5a1 1 0 0 0-1 1v3m12-4h3a1 1 0 0 1 1 1v3M4 16v3a1 1 0 0 0 1 1h3m8 0h3a1 1 0 0 0 1-1v-3"/><circle cx="12" cy="12" r="3.5"/></symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5v-2a1 1 0 0 1 1-1h5l2 2h7a1.5 1.5 0 0 1 1.5 1.5v1M3.5 8.5h16a1.4 1.4 0 0 1 1.4 1.7l-1.4 7.7a1.7 1.7 0 0 1-1.7 1.4H5.2a1.7 1.7 0 0 1-1.7-1.7z"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></symbol>
+      <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.2"/><path d="m4.5 17 4.3-3.5 2.5 1.7 4.2-4.8 4.5 5.6"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v11m-4-4 4 4 4-4M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></symbol>
+      <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1.1 7.1M4 4v6h6"/></symbol>
+      <symbol id="i-map" viewBox="0 0 24 24"><path d="M18.5 10c0 4.3-6.5 10-6.5 10s-6.5-5.7-6.5-10a6.5 6.5 0 0 1 13 0z"/><circle cx="12" cy="10" r="2"/></symbol>
+      <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/></symbol>
+    </defs>
+  </svg>
+  <a class="skip" href="#street-url">跳至網址輸入欄</a>
+  <header class="sitehead">
+    <div class="shell head-inner">
+      <a class="wordmark" href="#top" aria-label="街景 360° 首頁">
+        <svg class="mark" width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#1c3433"/><g fill="none" stroke="#f6f7ef" stroke-width="1.35"><circle cx="17" cy="17" r="10.7"/><ellipse cx="17" cy="17" rx="4.8" ry="10.7"/><path d="M6.3 17h21.4M9 9.7q8 5.2 16 0M9 24.3q8-5.2 16 0"/></g><circle cx="25.5" cy="10.4" r="3.4" fill="#ed7855" stroke="#1c3433" stroke-width="1.2"/></svg>
+        <span>街景 <b>360°</b></span>
+      </a>
+      <a class="help-link" href="#help"><svg class="icon" aria-hidden="true"><use href="#i-question"/></svg>使用說明</a>
+    </div>
+  </header>
+  <main class="shell" id="top">
+    <div class="intro"><h1>街景全景下載</h1><p>貼上 Google 地圖街景網址，預覽並儲存 2:1 的 360° 全景圖。</p></div>
+    <div class="workspace">
+      <section class="panel controls" aria-labelledby="settings-title">
+        <div class="panel-heading"><svg class="icon heading-icon" aria-hidden="true"><use href="#i-focus"/></svg><h2 id="settings-title">取得全景圖</h2></div>
+        <form id="street-form">
+          <label class="field-label" for="street-url">Google 地圖街景網址</label>
+          <div class="input-wrap">
+            <input id="street-url" type="text" inputmode="url" placeholder="https://www.google.com/maps/…" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="url-hint" required>
+            <button class="paste" type="button" id="paste-link" aria-label="貼上網址" title="貼上網址"><svg class="icon" aria-hidden="true"><use href="#i-clip"/></svg></button>
+          </div>
+          <p id="url-hint" class="field-hint">可貼上 Google 地圖街景，或 Google 搜尋中「街景和 360° 相片」的完整網址。</p>
+          <label class="field-label quality-label" for="quality">輸出畫質</label>
+          <div class="select-wrap"><select id="quality">
+            <option value="2048">2K · 2048 × 1024</option>
+            <option value="4096" selected>4K · 4096 × 2048</option>
+            <option value="8192">8K · 8192 × 4096</option>
+          </select><svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg></div>
+          <button class="primary" id="start" type="button"><svg class="icon" aria-hidden="true"><use href="#i-focus"/></svg><span id="start-label">取得全景圖</span></button>
+          <div class="feedback">
+            <p id="status" role="status" aria-live="polite"></p>
+            <a class="inline-action" id="place-map" target="_blank" rel="noopener noreferrer" hidden><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>開啟地點並選擇街景</a>
+            <progress id="progress" max="100" value="0" aria-label="全景圖處理進度" hidden></progress>
+            <button class="inline-action" id="cancel" type="button" hidden><svg class="icon" aria-hidden="true"><use href="#i-stop"/></svg>取消處理</button>
+          </div>
+        </form>
+        <div class="alternatives">
+          <div class="local"><input id="local-file" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" class="file-control"><label class="secondary" for="local-file"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg>匯入全景照片</label></div>
+          <button type="button" id="demo" class="secondary"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>載入範例</button>
+        </div>
+        <p class="rights-note">請使用您拍攝或已獲授權下載的全景影像。</p>
+      </section>
+      <section class="panel preview" aria-labelledby="preview-title">
+        <div class="panel-heading preview-heading"><svg class="icon heading-icon" aria-hidden="true"><use href="#i-image"/></svg><h2 id="preview-title">全景預覽</h2></div>
+        <div id="preview-stage" class="stage">
+          <div id="placeholder" class="placeholder">
+            <svg class="terrain" width="800" height="330" viewBox="0 0 800 330" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <defs>
+                <pattern id="geo-grid" width="44" height="44" patternUnits="userSpaceOnUse"><path d="M44 0H0v44" fill="none" stroke="#74948b" opacity=".22" stroke-width=".8"/></pattern>
+                <pattern id="geo-hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(29)"><path d="M0 0v8" stroke="#85a298" opacity=".37" stroke-width="1.3"/></pattern>
+                <linearGradient id="terrain-bg" x2="0" y2="1"><stop stop-color="#22423f"/><stop offset="1" stop-color="#36594f"/></linearGradient>
+                <linearGradient id="terrain-front" x2="0" y2="1"><stop stop-color="#264b43"/><stop offset="1" stop-color="#122f2e"/></linearGradient>
+                <path id="front-ridge" d="M-35 277c38-31 67-45 107-36s68 39 116 44 51-8 84-12 66 18 104 23 68-11 93-30 32-37 70-48 53-29 85-24 44 27 71 29 52-18 83-16 48 6 72 12"/>
+                <path id="back-ridge" d="M-45 198c41-9 74-36 108-42s60-35 99-22 73 39 108 43 47-3 74 0 41 14 69 12 47-22 69-25 41 5 64-7 37-37 62-35 39 24 66 21 45-32 69-31 54 16 98 1"/>
+                <clipPath id="terrain-limit"><path d="M0 0h800v330H0z"/></clipPath>
+              </defs>
+              <g clip-path="url(#terrain-limit)">
+                <rect width="800" height="330" fill="url(#terrain-bg)"/><rect width="800" height="330" fill="url(#geo-grid)"/>
+                <g fill="none" stroke="#9ab8a9" stroke-width=".8" opacity=".33">
+                  <circle cx="569" cy="87" r="40"/><circle cx="569" cy="87" r="52" stroke-dasharray="2 6"/><path d="M499 87h140M569 17v140" stroke-dasharray="4 5"/>
+                </g>
+                <circle cx="569" cy="87" r="21" fill="#d39268" opacity=".9"/><circle cx="569" cy="87" r="25" fill="none" stroke="#d39268" stroke-width="1" opacity=".6"/>
+                <path d="M-45 198c41-9 74-36 108-42s60-35 99-22 73 39 108 43 47-3 74 0 41 14 69 12 47-22 69-25 41 5 64-7 37-37 62-35 39 24 66 21 45-32 69-31 54 16 98 1V350H-45z" fill="#3a5a50"/>
+                <g fill="none" stroke="#8ca398" stroke-width="1.05" opacity=".68">
+                  <use href="#back-ridge"/><use href="#back-ridge" transform="translate(-3 8)"/><use href="#back-ridge" transform="translate(-7 16)"/><use href="#back-ridge" transform="translate(-11 25)"/><use href="#back-ridge" transform="translate(-15 34)"/><use href="#back-ridge" transform="translate(-21 45)"/><use href="#back-ridge" transform="translate(-28 57)"/><use href="#back-ridge" transform="translate(-37 70)"/><use href="#back-ridge" transform="translate(-45 85)"/>
+                </g>
+                <path d="M-40 208q38-31 75-19t61 12q32-8 48 2t47 19q30 4 58 15t74 14q51 4 76-3t69-1q39 6 68 5t70 18q47 22 101 19t119-13v75H-40z" fill="#2b4b45" stroke="#82998b" stroke-width="1.3"/>
+                <path d="M-40 208q38-31 75-19t61 12q32-8 48 2t47 19q30 4 58 15t74 14q51 4 76-3t69-1q39 6 68 5t70 18q47 22 101 19t119-13v75H-40z" fill="url(#geo-hatch)"/>
+                <path d="M-35 277c38-31 67-45 107-36s68 39 116 44 51-8 84-12 66 18 104 23 68-11 93-30 32-37 70-48 53-29 85-24 44 27 71 29 52-18 83-16 48 6 72 12v135H-35z" fill="url(#terrain-front)"/>
+                <g stroke="#83a193" fill="none" stroke-width="1" opacity=".68"><use href="#front-ridge"/><use href="#front-ridge" transform="translate(-2 7)"/><use href="#front-ridge" transform="translate(-5 15)"/><use href="#front-ridge" transform="translate(-10 24)"/><use href="#front-ridge" transform="translate(-17 34)"/><use href="#front-ridge" transform="translate(-23 46)"/><use href="#front-ridge" transform="translate(-30 59)"/><use href="#front-ridge" transform="translate(-38 73)"/><use href="#front-ridge" transform="translate(-47 88)"/></g>
+                <g fill="none" stroke="#e2e7d4" stroke-width="1.2" opacity=".5"><path d="M18 33V18h15m734 0h15v15M18 297v15h15m734 0h15v-15"/></g>
+              </g>
+            </svg>
+            <div class="empty-label"><span class="empty-dot" aria-hidden="true"></span>尚未載入全景</div>
+          </div>
+          <img id="preview-photo" alt="已取得的全景影像" hidden>
+          <canvas id="preview-canvas" tabindex="0" aria-label="360° 全景，可拖曳或用方向鍵轉動視角" hidden></canvas>
+          <div id="viewer-actions" class="viewer-actions" hidden><span>拖曳轉動</span><button type="button" id="reset-view"><svg class="icon" aria-hidden="true"><use href="#i-reset"/></svg>重設視角</button></div>
+        </div>
+        <div class="preview-footer">
+          <div class="file-head"><h3 id="scene-name">全景影像</h3><a id="source-map" class="inline-action" target="_blank" rel="noopener noreferrer" hidden><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>開啟原街景</a></div>
+          <dl class="specs"><div><dt>讀取尺寸</dt><dd id="source-size">—</dd></div><div><dt>輸出尺寸</dt><dd id="output-size">—</dd></div></dl>
+          <button id="save" class="save" type="button" disabled><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>下載 JPG</button>
+        </div>
+      </section>
+    </div>
+    <details class="help" id="help">
+      <summary><svg class="icon" aria-hidden="true"><use href="#i-question"/></svg>如何取得街景網址？<svg class="icon expand-icon" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+      <div class="help-body">
+        <ol><li>在電腦上開啟 Google 地圖，把小黃人拖到藍色街道或全景圓點。</li><li>等影像載入，直接複製瀏覽器網址列中的完整網址。若拿到分享短網址，請先在瀏覽器開啟再複製。</li><li>貼回此頁，選擇畫質並按「取得全景圖」。預覽後即可下載 2:1 JPG。</li></ol>
+        <p>已有自己的全景照片，也可以直接匯入 2:1 的 JPG、PNG 或 WebP。Google 自有街景的離線使用限制請見 <a href="https://about.google/brand-resource-center/products-and-services/geo-guidelines/#street-view" target="_blank" rel="noopener noreferrer">Google 街景使用規範</a>。</p>
+      </div>
+    </details>
+  </main>
+<script>
+(() => {
+const vertex = [
+  "attribute vec2 position;",
+  "void main() {",
+  "  gl_Position = vec4(position, 0.0, 1.0);",
+  "}",
+].join("\n");
+
+const fragment = [
+  "precision highp float;",
+  "uniform sampler2D photo;",
+  "uniform vec2 resolution;",
+  "uniform float yaw;",
+  "uniform float pitch;",
+  "uniform float scale;",
+  "void main() {",
+  "  const float pi = 3.1415926536;",
+  "  vec2 position = (2.0 * gl_FragCoord.xy - resolution) / resolution.y;",
+  "  vec3 ray = normalize(vec3(position * scale, 1.0));",
+  "  float up = ray.y * cos(pitch) + ray.z * sin(pitch);",
+  "  float forward = ray.z * cos(pitch) - ray.y * sin(pitch);",
+  "  float longitude = atan(ray.x, forward) + yaw;",
+  "  float latitude = asin(clamp(up, -1.0, 1.0));",
+  "  vec2 uv = vec2(fract(0.5 + longitude / (2.0 * pi)), 0.5 - latitude / pi);",
+  "  gl_FragColor = texture2D(photo, uv);",
+  "}",
+].join("\n");
+
+function shader(gl, kind, source) {
+  const compiled = gl.createShader(kind);
+  gl.shaderSource(compiled, source);
+  gl.compileShader(compiled);
+  if (!gl.getShaderParameter(compiled, gl.COMPILE_STATUS)) throw new Error("Preview shader unavailable");
+  return compiled;
+}
+
+function createPanorama(canvas, resetButton, onLost) {
+  try {
+    const gl = canvas.getContext("webgl", { antialias: false, alpha: false });
+    if (!gl) return null;
+    const program = gl.createProgram();
+    gl.attachShader(program, shader(gl, gl.VERTEX_SHADER, vertex));
+    gl.attachShader(program, shader(gl, gl.FRAGMENT_SHADER, fragment));
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return null;
+    gl.useProgram(program);
+
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const position = gl.getAttribLocation(program, "position");
+    gl.enableVertexAttribArray(position);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    const uniforms = Object.fromEntries(["resolution", "yaw", "pitch", "scale"].map(name => [name, gl.getUniformLocation(program, name)]));
+
+    let yaw = 0;
+    let pitch = 0;
+    let scale = 0.66;
+    let drag;
+    let ready = false;
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+    function draw() {
+      if (!ready || canvas.hidden) return;
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.round(canvas.clientWidth * ratio);
+      const height = Math.round(canvas.clientHeight * ratio);
+      if (!width || !height) return;
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      gl.viewport(0, 0, width, height);
+      gl.uniform2f(uniforms.resolution, width, height);
+      gl.uniform1f(uniforms.yaw, yaw);
+      gl.uniform1f(uniforms.pitch, pitch);
+      gl.uniform1f(uniforms.scale, scale);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+    function move(horizontal, vertical) {
+      yaw = (yaw + horizontal) % (2 * Math.PI);
+      pitch = clamp(pitch + vertical, -1.45, 1.45);
+      draw();
+    }
+    function reset() {
+      yaw = 0;
+      pitch = 0;
+      scale = 0.66;
+      draw();
+    }
+
+    canvas.addEventListener("pointerdown", event => {
+      if (event.button !== 0) return;
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      canvas.setPointerCapture(event.pointerId);
+    });
+    canvas.addEventListener("pointermove", event => {
+      if (event.pointerId !== drag?.id) return;
+      const sensitivity = (2 * Math.atan(scale)) / Math.max(canvas.clientHeight, 1);
+      move((drag.x - event.clientX) * sensitivity, (event.clientY - drag.y) * sensitivity);
+      drag.x = event.clientX;
+      drag.y = event.clientY;
+    });
+    const release = event => { if (event.pointerId === drag?.id) drag = null; };
+    canvas.addEventListener("pointerup", release);
+    canvas.addEventListener("pointercancel", release);
+    canvas.addEventListener("lostpointercapture", release);
+    canvas.addEventListener("keydown", event => {
+      const steps = { ArrowLeft: [-.11, 0], ArrowRight: [.11, 0], ArrowUp: [0, .11], ArrowDown: [0, -.11] };
+      if (Object.hasOwn(steps, event.key)) {
+        event.preventDefault();
+        move(...steps[event.key]);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        reset();
+      }
+    });
+    canvas.addEventListener("webglcontextlost", event => {
+      event.preventDefault();
+      ready = false;
+      onLost();
+    });
+    resetButton.addEventListener("click", reset);
+    new ResizeObserver(draw).observe(canvas);
+
+    return {
+      load(image) {
+        if (gl.isContextLost()) return false;
+        try {
+          const max = Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE), 4096);
+          let input = image;
+          if (Math.max(image.naturalWidth, image.naturalHeight) > max) {
+            const ratio = max / Math.max(image.naturalWidth, image.naturalHeight);
+            input = document.createElement("canvas");
+            input.width = Math.round(image.naturalWidth * ratio);
+            input.height = Math.round(image.naturalHeight * ratio);
+            input.getContext("2d").drawImage(image, 0, 0, input.width, input.height);
+          }
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, input);
+          ready = gl.getError() === gl.NO_ERROR;
+          reset();
+          return ready;
+        } catch {
+          ready = false;
+          return false;
+        }
+      },
+      draw,
+    };
+  } catch {
+    return null;
+  }
+}
+
+const imageLimit = 96 * 1024 * 1024;
+const imageTypes = new Map([["image/jpeg", "JPG"], ["image/png", "PNG"], ["image/webp", "WebP"]]);
+
+async function imageType(blob) {
+  const bytes = new Uint8Array(await blob.slice(0, 12).arrayBuffer());
+  if (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) return "image/jpeg";
+  if (bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71) return "image/png";
+  if (String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" && String.fromCharCode(...bytes.slice(8)) === "WEBP") return "image/webp";
+  throw new Error("請使用 JPG、PNG 或 WebP 全景照片。");
+}
+
+async function readImage(url) {
+  const response = await fetch(url, {
+    credentials: "same-origin", referrerPolicy: "no-referrer", redirect: "error", signal: AbortSignal.timeout(45000),
+  });
+  if (!response.ok || !response.body) throw new Error("目前無法讀取這個來源的圖片。");
+  if (Number(response.headers.get("content-length")) > imageLimit) {
+    await response.body.cancel();
+    throw new Error("這張照片超過 96 MB，請先在原始來源儲存。");
+  }
+  const parts = [];
+  let size = 0;
+  const reader = response.body.getReader();
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > imageLimit) {
+        await reader.cancel();
+        throw new Error("這張照片超過 96 MB，請先在原始來源儲存。");
+      }
+      parts.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const raw = new Blob(parts);
+  return raw.slice(0, raw.size, await imageType(raw));
+}
+
+function loadImageElement(url) {
+  return new Promise((resolve, reject) => {
+    const picture = new Image();
+    picture.onload = () => resolve(picture);
+    picture.onerror = () => reject(new Error("無法預覽這張照片，請確認檔案可正常開啟。"));
+    picture.src = url;
+  });
+}
+
+async function photoFromBlob(blob, title, sourceUrl) {
+  if (blob.size > imageLimit) throw new Error("這張照片超過 96 MB。");
+  const type = await imageType(blob);
+  const file = blob.type === type ? blob : blob.slice(0, blob.size, type);
+  const preview = URL.createObjectURL(file);
+  try {
+    const image = await loadImageElement(preview);
+    const width = image.naturalWidth;
+    const height = image.naturalHeight;
+    if (Math.abs(width / height - 2) > 0.018) {
+      throw new Error("請選擇寬高比約 2:1 的等距柱狀全景照片。這張圖是 " + width + " × " + height + "。");
+    }
+    return {
+      title: title || "全景照片",
+      width, height, preview, sourceUrl,
+      source: sourceUrl ? "圖片網址" : "本機照片",
+      format: imageTypes.get(type),
+      originFile: sourceUrl,
+      blob: file,
+    };
+  } catch (error) {
+    URL.revokeObjectURL(preview);
+    throw error;
+  }
+}
+
+function xmlText(value) {
+  return String(value || "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;",
+  })[char]);
+}
+
+async function photoSphereJpeg(jpeg, width, height, photo) {
+  const head = new Uint8Array(await jpeg.slice(0, 6).arrayBuffer());
+  if (head[0] !== 255 || head[1] !== 216) throw new Error("無法產生 JPG。");
+  const jfif = head[2] === 255 && head[3] === 224;
+  const insertAt = jfif ? 4 + head[4] * 256 + head[5] : 2;
+  const xmp = [
+    "http://ns.adobe.com/xap/1.0/\0",
+    '<x:xmpmeta xmlns:x="adobe:ns:meta/">',
+    '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">',
+    '<rdf:Description rdf:about="" xmlns:GPano="http://ns.google.com/photos/1.0/panorama/"',
+    ' xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xmpRights="http://ns.adobe.com/xap/1.0/rights/"',
+    ' GPano:ProjectionType="equirectangular" GPano:UsePanoramaViewer="True"',
+    ' GPano:CroppedAreaLeftPixels="0" GPano:CroppedAreaTopPixels="0"',
+    ' GPano:FullPanoWidthPixels="' + width + '" GPano:FullPanoHeightPixels="' + height + '"',
+    ' GPano:CroppedAreaImageWidthPixels="' + width + '" GPano:CroppedAreaImageHeightPixels="' + height + '"',
+    ' xmpRights:WebStatement="' + xmlText(photo.licenseUrl) + '">',
+    '<dc:title><rdf:Alt><rdf:li xml:lang="x-default">' + xmlText(photo.title) + "</rdf:li></rdf:Alt></dc:title>",
+    photo.author ? "<dc:creator><rdf:Seq><rdf:li>" + xmlText(photo.author) + "</rdf:li></rdf:Seq></dc:creator>" : "",
+    photo.sourceUrl ? "<dc:source>" + xmlText(photo.sourceUrl) + "</dc:source>" : "",
+    "</rdf:Description></rdf:RDF></x:xmpmeta>",
+  ].join("");
+  const payload = new TextEncoder().encode(xmp);
+  const length = payload.length + 2;
+  const marker = Uint8Array.of(255, 225, length >> 8, length & 255);
+  return new Blob([jpeg.slice(0, insertAt), marker, payload, jpeg.slice(insertAt)], { type: "image/jpeg" });
+}
+
+async function resizePhoto(blob, width, photo) {
+  const height = width / 2;
+  const objectUrl = URL.createObjectURL(blob);
+  try {
+    const picture = await loadImageElement(objectUrl);
+    const output = document.createElement("canvas");
+    output.width = width;
+    output.height = height;
+    const context = output.getContext("2d", { alpha: false });
+    if (!context) throw new Error("瀏覽器無法縮放這張照片。");
+    context.imageSmoothingQuality = "high";
+    context.drawImage(picture, 0, 0, width, height);
+    const jpeg = await new Promise((resolve, reject) => {
+      output.toBlob(value => value ? resolve(value) : reject(new Error("無法產生 JPG。")), "image/jpeg", .93);
+    });
+    output.width = 0;
+    output.height = 0;
+    return photoSphereJpeg(jpeg, width, height, photo);
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+function savePhoto(blob, photo, width) {
+  const title = photo.title.replace(/[\\/:*?"<>|]/g, "-").slice(0, 135);
+  const extension = imageTypes.get(blob.type)?.toLowerCase() || "jpg";
+  const link = document.createElement("a");
+  const objectUrl = URL.createObjectURL(blob);
+  link.href = objectUrl;
+  link.download = title + "-360" + (width ? "-" + width : "") + "." + extension;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
+}
+
+const streetMapDomains = new Set((
+  "com com.tw com.hk co.jp co.kr com.sg com.my co.th com.vn co.in " +
+  "com.au co.nz co.uk ie ca de fr nl be ch at cz dk es fi gr hu it " +
+  "no pl pt ro se sk com.br com.mx com.ar co.za co.id com.ph"
+).split(" "));
+const streetPanoPattern = /^[A-Za-z0-9_-]{8,512}={0,2}$/;
+
+function decodeStreetParts(value) {
+  // Maps links can nest an escaped photo URL inside another escaped data field.
+  let decoded = value;
+  for (let pass = 0; pass < 3; pass++) {
+    const next = decoded.replace(/(?:%[\da-f]{2})+/gi, sequence => {
+      try { return decodeURIComponent(sequence); } catch { return sequence; }
+    });
+    if (next === decoded) break;
+    decoded = next;
+  }
+  return decoded;
+}
+
+function streetCoordinates(lat, lng) {
+  if (lat == null || lng == null || !String(lat).trim() || !String(lng).trim()) return null;
+  const point = { lat: Number(lat), lng: Number(lng) };
+  return Number.isFinite(point.lat) && Math.abs(point.lat) <= 90 &&
+    Number.isFinite(point.lng) && Math.abs(point.lng) <= 180 ? point : null;
+}
+
+function streetImageUrl(value) {
+  if (!value) return undefined;
+  try {
+    const photo = new URL(value);
+    if (photo.protocol !== "https:" || photo.username || photo.password || photo.port ||
+        !/^lh[1-6]\.googleusercontent\.com$/i.test(photo.hostname) ||
+        !/^\/(?:p|gps-cs-s|gpms-cs-s)\/[\w-]+(?:=[\w.,-]+)?\/?$/.test(photo.pathname) ||
+        photo.search || photo.hash) return undefined;
+    return photo.href;
+  } catch { return undefined; }
+}
+
+// Google uses a protobuf image key for both road panoramas (2) and contributions (10).
+function unpackStreetId(id) {
+  try {
+    const bytes = atob(id.replace(/-/g, "+").replace(/_/g, "/"));
+    if (bytes.charCodeAt(0) !== 8 || ![2, 10].includes(bytes.charCodeAt(1)) ||
+        bytes.charCodeAt(2) !== 18) return id;
+    let length = bytes.charCodeAt(3), start = 4;
+    if (length >= 128) { length = (length & 127) + bytes.charCodeAt(4) * 128; start++; }
+    const inner = bytes.slice(start);
+    if (length === inner.length && streetPanoPattern.test(inner)) return inner;
+  } catch { /* Plain panorama IDs do not require base64 decoding. */ }
+  return id;
+}
+
+function checkedStreetId(value) {
+  if (!streetPanoPattern.test(value)) throw new Error("全景編號格式不完整，請重新複製街景網址。");
+  return unpackStreetId(value);
+}
+
+function mapScene(panoId, coordinates) {
+  const url = new URL("https://www.google.com/maps/@");
+  url.searchParams.set("api", "1");
+  url.searchParams.set("map_action", "pano");
+  url.searchParams.set("pano", panoId);
+  if (coordinates) url.searchParams.set("viewpoint", coordinates.lat + "," + coordinates.lng);
+  return { panoId, mapUrl: url.href, ...coordinates };
+}
+
+function fidScene(url, match, explicitId) {
+  const place = { kind: "place", mapUrl: "https://www.google.com/maps?cid=" + BigInt(match[1]).toString() };
+  const sphere = match[2]?.toLowerCase() === "photosphere";
+  const iu = decodeStreetParts(url.searchParams.get("iu") || "");
+  const imageUrl = streetImageUrl(iu);
+  let roadId;
+  if (iu) {
+    try {
+      const thumb = new URL(iu);
+      if (thumb.protocol === "https:" && !thumb.username && !thumb.password && !thumb.port &&
+          ["streetviewpixels-pa.googleapis.com", "streetviewpixels-pa.clients6.google.com"].includes(thumb.hostname) &&
+          thumb.pathname === "/v1/thumbnail") roadId = thumb.searchParams.get("panoid");
+    } catch { /* Unknown thumbnail formats supply no usable scene identifier. */ }
+  }
+  // A normal place photo can also have an image key and an AF1Qip identifier.
+  if (!sphere && !explicitId && !roadId) return place;
+  const ids = [];
+  if (explicitId) ids.push(checkedStreetId(explicitId));
+  if (roadId != null) ids.push(checkedStreetId(roadId));
+  if (sphere && url.searchParams.has("ik")) {
+    const key = decodeStreetParts(url.searchParams.get("ik")).replace(/ /g, "+");
+    const unpacked = unpackStreetId(key);
+    if (unpacked === key && !/^(?:[A-Za-z0-9_-]{22}|(?:AF1Qip|CIH)[A-Za-z0-9_-]{10,})$/.test(key)) {
+      throw new Error("全景相片連結中的影像編號不完整，請在 Google 地圖重新複製完整網址。");
+    }
+    ids.push(checkedStreetId(unpacked));
+  }
+  if (sphere && imageUrl) {
+    const fileId = /^\/p\/([\w-]+)/.exec(new URL(imageUrl).pathname)?.[1];
+    if (fileId) ids.push(checkedStreetId(fileId));
+  }
+  if (!ids.length) {
+    if (sphere && iu) throw new Error("全景相片連結缺少可辨識的影像編號，請在 Google 地圖開啟該全景後複製完整網址。");
+    return place;
+  }
+  if (new Set(ids).size > 1) throw new Error("連結中的全景編號與影像來源不一致，請重新複製同一個街景的完整網址。");
+  const scene = mapScene(ids[0]);
+  if (sphere && imageUrl) scene.imageUrl = imageUrl;
+  return scene;
+}
+
+/** Parse a single Google Maps panorama link without resolving coordinates to a different scene. */
+function parseStreetLink(input) {
+  let value = String(input ?? "").trim();
+  if (!value) throw new Error("請先貼上 Google 地圖街景網址。");
+  if (value.length > 16384) throw new Error("網址過長，請回到 Google 地圖，重新複製街景網址。");
+  // The Google Maps sharing dialog also offers an iframe snippet. Treat it strictly as text.
+  if (/^<iframe\b/i.test(value)) {
+    const src = /\s+src\s*=\s*(["'])(.*?)\1/i.exec(value);
+    if (!src) throw new Error("找不到嵌入網址，請複製完整的街景連結。");
+    value = src[2];
+  }
+  value = value.replace(/&amp;/gi, "&");
+  if (/^(?:(?:www\.|maps\.)?google\.|maps\.app\.goo\.gl\/|goo\.gl\/maps\/)/i.test(value)) {
+    value = "https://" + value;
+  }
+  let url;
+  try { url = new URL(value); } catch { throw new Error("網址格式無法辨識，請貼上 Google 地圖街景畫面的完整網址。"); }
+  if (!["https:", "http:"].includes(url.protocol) || url.username || url.password || url.port) {
+    throw new Error("請使用 Google 地圖的完整 HTTPS 街景網址。");
+  }
+
+  const host = url.hostname.toLowerCase();
+  if (host === "maps.app.goo.gl" || (host === "goo.gl" && /^\/maps(?:\/|$)/i.test(url.pathname))) {
+    throw new Error("這是分享短網址。請先開啟它，進入街景並等畫面載入，再複製瀏覽器網址列的完整網址。");
+  }
+  const domain = /^(?:(?:www|maps)\.)?google\.(.+)$/.exec(host);
+  const path = decodeStreetParts(url.pathname);
+  const localPlace = /^\/local\/place\/fid\/0x[\da-f]{1,16}:(0x[\da-f]{1,16})(?:\/([^/]+))?\/?$/i.exec(path);
+  const mapsPath = /^\/maps(?:\/|$)/i.test(path) || (host.startsWith("maps.") && path === "/");
+  if (!domain || !streetMapDomains.has(domain[1]) || (!mapsPath && !localPlace)) {
+    throw new Error("請從 Google 地圖的街景畫面複製網址，或貼上 Google 地圖提供的街景嵌入連結。");
+  }
+
+  const data = decodeStreetParts(url.searchParams.get("pb") || url.searchParams.get("data") || path.split("/data=")[1] || "");
+  let panoId;
+  for (const key of ["pano", "panoid", "panoId", "cbpano"]) {
+    const candidate = decodeStreetParts(url.searchParams.get(key) || "");
+    if (url.searchParams.has(key)) {
+      if (!streetPanoPattern.test(candidate)) throw new Error("全景編號格式不完整，請重新複製街景網址。");
+      panoId = candidate;
+      break;
+    }
+  }
+  if (localPlace) return fidScene(url, localPlace, panoId);
+  const typedId = /!1s([\w=-]+)!2e(?:0|1|2|10)(?=!|\/|$)/.exec(data)?.[1];
+  const embedId = /^\/maps\/embed(?:\/|$)/i.test(path)
+    ? /!1s([\w=-]+)!2m2!1d/.exec(data)?.[1] : null;
+  const scenePoint = /@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),3a(?=,|\/|$)/i.exec(path);
+  const viewId = scenePoint && /!1e1(?:!|$)/.test(data)
+    ? /!1s([\w=-]+)(?=!|\/|$)/.exec(data)?.[1] : null;
+  panoId ??= typedId || embedId || viewId;
+  if (!panoId || !streetPanoPattern.test(panoId)) {
+    throw new Error("這個網址沒有指定全景編號。請把 Google 地圖的小黃人拖到街上，等街景載入後，再複製網址列的完整網址。");
+  }
+
+  const queryPoint = (url.searchParams.get("viewpoint") || url.searchParams.get("location") || "").split(",");
+  const embedPoint = /!2m2!1d(-?[\d.]+)!2d(-?[\d.]+)/.exec(data);
+  const coordinates = streetCoordinates(scenePoint?.[1], scenePoint?.[2]) ||
+    streetCoordinates(queryPoint[0], queryPoint[1]) || streetCoordinates(embedPoint?.[1], embedPoint?.[2]);
+  // Do not carry API keys, embed tokens or unrelated tracking values into the output link.
+  const scene = mapScene(panoId, coordinates);
+  if (panoId === (typedId || embedId || viewId)) {
+    const imageUrl = streetImageUrl(/!6s(https:\/\/[^!\s]+)/i.exec(data)?.[1]);
+    if (imageUrl) scene.imageUrl = imageUrl;
+    const size = /!7i(\d{3,6})!8i(\d{3,6})(?=!|\/|$)/.exec(data);
+    if (size && Number(size[1]) === Number(size[2]) * 2 && Number(size[1]) <= 131072) {
+      scene.imageWidth = Number(size[1]);
+      scene.imageHeight = Number(size[2]);
+    }
+  }
+  return scene;
+}
+
+
+const streetTileSize = 512;
+const streetWidths = [2048, 4096, 8192];
+const incompleteScene = "街景來源沒有傳回完整影像。請重新複製街景網址，或選擇其他畫質。";
+const unavailableCanvas = "瀏覽器沒有足夠的畫布空間，請選擇較低畫質再試一次。";
+
+function streetCanvas(width, height, readOften = false) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d", { alpha: false, willReadFrequently: readOften });
+  if (!context) throw new Error(unavailableCanvas);
+  return context;
+}
+
+function streetTileUrl(id, zoom, x, y) {
+  const url = new URL("https://streetviewpixels-pa.googleapis.com/v1/tile");
+  url.search = new URLSearchParams({ cb_client: "maps_sv.tactile", panoid: id, zoom, x, y });
+  return url;
+}
+
+async function streetBitmap(url, signal, limit) {
+  signal.throwIfAborted();
+  const local = new AbortController();
+  const stop = () => local.abort(signal.reason);
+  signal.addEventListener("abort", stop, { once: true });
+  const timeout = setTimeout(() => local.abort(new Error("街景來源回應逾時，請稍後再試。")), 30000);
+  try {
+    // The optional Mac launcher serves the page and the authorized image on the same origin.
+    const localServer = document.querySelector('meta[name="street-local-service"][content="1"]');
+    const requestUrl = localServer ? "/street-media?url=" + encodeURIComponent(url.href) : url;
+    const response = await fetch(requestUrl, { credentials: "omit", mode: "cors", signal: local.signal });
+    if (!response.ok) {
+      if (response.status === 429) throw new Error("Google 目前限制讀取次數，請稍後再試。");
+      if (response.status === 401 || response.status === 403) throw new Error("Google 未開放讀取這張全景。");
+      throw new Error(incompleteScene);
+    }
+    if (!response.body || Number(response.headers.get("content-length")) > limit) throw new Error("來源影像超過可處理大小。");
+    const reader = response.body.getReader();
+    const chunks = [];
+    let bytes = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        bytes += value.byteLength;
+        if (bytes > limit) {
+          await reader.cancel();
+          throw new Error("來源影像超過可處理大小。");
+        }
+        chunks.push(value);
+      }
+    } finally {
+      reader.releaseLock();
+    }
+    const blob = new Blob(chunks, { type: response.headers.get("content-type") || "image/jpeg" });
+    if (!blob.size) throw new Error(incompleteScene);
+    // Using a local object URL also works on browsers without createImageBitmap.
+    const objectUrl = URL.createObjectURL(blob);
+    try {
+      const image = new Image();
+      image.src = objectUrl;
+      await image.decode().catch(() => { throw new Error(incompleteScene); });
+      local.signal.throwIfAborted();
+      return image;
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  } catch (error) {
+    if (local.signal.aborted) throw local.signal.reason;
+    if (error instanceof TypeError) {
+      throw new Error(window.self !== window.top
+        ? "預覽頁無法連上街景影像來源。請下載 HTML 後用瀏覽器開啟，或使用 Mac 啟動版。"
+        : "目前無法連上影像來源。請確認網路；若瀏覽器限制跨網站讀取，可使用 Mac 啟動版。");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+    signal.removeEventListener("abort", stop);
+  }
+}
+
+// Legacy scenes occupy 416 × 208 pixels in the first tile. Some cameras fill
+// the extra 96 columns by repeating the left edge. Only the vertical padding is
+// shared between the black-padded and wrapped variants.
+function roadBaseWidth(image) {
+  const w = image.naturalWidth;
+  const h = image.naturalHeight;
+  if (![416, 512].includes(w) || h > 512 || h < 208) throw new Error(incompleteScene);
+  const sample = streetCanvas(w, h, true);
+  sample.drawImage(image, 0, 0);
+  const { data } = sample.getImageData(0, 0, w, h);
+  sample.canvas.width = 0;
+  let bottom = 0;
+  for (let y = h - 1; y >= 0; y--) {
+    let visible = 0;
+    for (let x = 4; x < Math.min(w, 416) - 4; x += 4) {
+      const i = (y * w + x) * 4;
+      if (Math.max(data[i], data[i + 1], data[i + 2]) > 15) visible++;
+    }
+    if (visible >= 3) {
+      bottom = y + 1;
+      break;
+    }
+  }
+  if (w === 512 && bottom >= 238 && bottom <= 260) return 512;
+  if (bottom >= 190 && bottom <= 212) return 416;
+  throw new Error("無法辨識此街景的完整邊界，請改用全景原始檔。");
+}
+
+function isStreetBlank(sample, image, sw, sh) {
+  sample.drawImage(image, 0, 0, sw, sh, 0, 0, 8, 8);
+  const { data } = sample.getImageData(0, 0, 8, 8);
+  let lightest = 0;
+  let darkest = 255;
+  for (let i = 0; i < data.length; i += 4) {
+    darkest = Math.min(darkest, data[i], data[i + 1], data[i + 2]);
+    lightest = Math.max(lightest, data[i], data[i + 1], data[i + 2]);
+  }
+  return lightest <= 3 || darkest >= 253;
+}
+
+function fullSphereUrl(scene, width) {
+  if (scene.imageUrl) {
+    const url = new URL(scene.imageUrl);
+    if (url.protocol !== "https:" || url.username || url.password || url.port ||
+      !/^lh[1-6]\.googleusercontent\.com$/.test(url.hostname) ||
+      !/^\/(?:p|gps-cs-s|gpms-cs-s)\/[\w-]+(?:=[\w.,-]+)?\/?$/.test(url.pathname) ||
+      url.search || url.hash) throw new Error("無法辨識全景圖片來源。");
+    // For older photo spheres the CDN path itself names the panorama. Modern
+    // opaque media URLs are paired with a matching upload ID by the Maps parser.
+    const namedId = /^\/p\/([\w-]+)/.exec(url.pathname)?.[1];
+    if (namedId && namedId !== scene.panoId) throw new Error("全景編號與圖片來源不一致，請重新複製街景網址。");
+    if (!namedId && !/^(?:CIH|AF1Qip)/.test(scene.panoId)) return null;
+    // A Maps preview URL can name a perspective crop. Request a proportional fit.
+    url.pathname = url.pathname.split("=")[0].replace(/\/$/, "") + "=s" + width;
+    url.search = "";
+    url.hash = "";
+    return url;
+  }
+  if (scene.panoId.startsWith("AF1Qip")) return new URL("https://lh3.googleusercontent.com/p/" + scene.panoId + "=s" + width);
+  if (/^CIH[A-Za-z0-9_-]/.test(scene.panoId)) {
+    return new URL("https://lh3.ggpht.com/jsapi2/a/b/c/w" + width + "-h" + (width / 2) + "/" + scene.panoId);
+  }
+  return null;
+}
+
+async function drawStreetTiles(output, scene, width, controller, progress) {
+  const signal = controller.signal;
+  // Full Maps URLs usually declare the original camera dimensions. Other URL
+  // formats omit them, so inspect their lowest-resolution tile when necessary.
+  let base;
+  if (scene.imageWidth === 13312 && scene.imageHeight === 6656) base = 416;
+  if (scene.imageWidth === 16384 && scene.imageHeight === 8192) base = 512;
+  if (!base) {
+    const preview = await streetBitmap(streetTileUrl(scene.panoId, 0, 0, 0), signal, 2 * 1024 * 1024);
+    base = roadBaseWidth(preview);
+  }
+  const zoom = Math.min(5, Math.ceil(Math.log2(width / base)));
+  const sourceWidth = base * 2 ** zoom;
+  const sourceHeight = sourceWidth / 2;
+  const columns = Math.ceil(sourceWidth / streetTileSize);
+  const rows = Math.ceil(sourceHeight / streetTileSize);
+  const total = rows * columns;
+  const sample = streetCanvas(8, 8, true);
+  let next = 0;
+  let completed = 0;
+  progress("tiles", 4, 0, total);
+  async function drawNext() {
+    while (next < total) {
+      signal.throwIfAborted();
+      const index = next++;
+      const col = index % columns;
+      const row = Math.floor(index / columns);
+      const x = col * streetTileSize;
+      const y = row * streetTileSize;
+      const sw = Math.min(streetTileSize, sourceWidth - x);
+      const sh = Math.min(streetTileSize, sourceHeight - y);
+      const tile = await streetBitmap(streetTileUrl(scene.panoId, zoom, col, row), signal, 2 * 1024 * 1024);
+      signal.throwIfAborted();
+      if (tile.naturalWidth < sw || tile.naturalHeight < sh ||
+        tile.naturalWidth > streetTileSize || tile.naturalHeight > streetTileSize ||
+        isStreetBlank(sample, tile, sw, sh)) throw new Error(incompleteScene);
+      const scale = width / sourceWidth;
+      const left = Math.round(x * scale);
+      const top = Math.round(y * scale);
+      output.drawImage(tile, 0, 0, sw, sh, left, top,
+        Math.round((x + sw) * scale) - left, Math.round((y + sh) * scale) - top);
+      completed++;
+      progress("tiles", 4 + Math.round(90 * completed / total), completed, total);
+    }
+  }
+  const jobs = Array.from({ length: Math.min(4, total) }, drawNext);
+  try {
+    await Promise.all(jobs);
+  } catch (error) {
+    controller.abort(error);
+    await Promise.allSettled(jobs);
+    throw error;
+  } finally {
+    sample.canvas.width = 0;
+  }
+  return { sourceWidth, sourceHeight };
+}
+
+async function getStreetImage(scene, width, { signal: external, onProgress } = {}) {
+  if (!streetWidths.includes(width)) throw new Error("請選擇 2K、4K 或 8K 解析度。");
+  if (!scene || !/^[A-Za-z0-9_-]{8,512}={0,2}$/.test(scene.panoId || "")) throw new Error("網址缺少可讀取的街景識別碼。");
+  scene = { ...scene, panoId: unpackStreetId(scene.panoId) };
+  external?.throwIfAborted();
+  const controller = new AbortController();
+  const signal = controller.signal;
+  const stop = () => controller.abort(external.reason);
+  external?.addEventListener("abort", stop, { once: true });
+  const progress = (stage, percent, completed = 0, total = 0) => onProgress?.({ stage, percent, completed, total });
+  let output;
+  try {
+    const height = width / 2;
+    progress("read", 1);
+    const direct = fullSphereUrl(scene, width);
+    output = streetCanvas(width, height);
+    output.imageSmoothingQuality = "high";
+    let dimensions;
+    if (direct) {
+      const image = await streetBitmap(direct, signal, 64 * 1024 * 1024);
+      if (Math.abs(image.naturalWidth / image.naturalHeight - 2) > 0.015 || image.naturalWidth < 256) {
+        throw new Error("來源提供的是一般照片或單一視角，無法輸出完整的 360° 全景。");
+      }
+      const sample = streetCanvas(8, 8, true);
+      const blank = isStreetBlank(sample, image, image.naturalWidth, image.naturalHeight);
+      sample.canvas.width = 0;
+      if (blank) throw new Error(incompleteScene);
+      output.drawImage(image, 0, 0, width, height);
+      dimensions = { sourceWidth: image.naturalWidth, sourceHeight: image.naturalHeight };
+    } else {
+      dimensions = await drawStreetTiles(output, scene, width, controller, progress);
+    }
+    signal.throwIfAborted();
+    progress("encode", 96);
+    const jpeg = await new Promise((resolve, reject) => output.canvas.toBlob(blob =>
+      blob ? resolve(blob) : reject(new Error(unavailableCanvas)), "image/jpeg", 0.93));
+    const blob = await photoSphereJpeg(jpeg, width, height, {
+      title: scene.title || "360° 全景", sourceUrl: scene.mapUrl, author: scene.author,
+    });
+    signal.throwIfAborted();
+    progress("done", 100);
+    return { blob, width, height, ...dimensions };
+  } finally {
+    external?.removeEventListener("abort", stop);
+    if (output) output.canvas.width = 0;
+  }
+}
+
+// A seamless, illustrated panorama that also works when the computer is offline.
+async function makeDemoPhoto() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 4096;
+  canvas.height = 2048;
+  const ctx = canvas.getContext("2d", { alpha: false });
+  if (!ctx) throw new Error("此瀏覽器無法繪製範例。");
+  const w = canvas.width, h = canvas.height;
+  const gradient = ctx.createLinearGradient(0, 0, 0, h);
+  [[0, "#244765"], [.32, "#9fb9bd"], [.48, "#f8d0a3"], [.52, "#e7bc98"],
+   [.64, "#6e9196"], [1, "#233f4c"]].forEach(([position, color]) => gradient.addColorStop(position, color));
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, w, h);
+  const sunX = w * .55, sunY = h * .448;
+  const glow = ctx.createRadialGradient(sunX, sunY, 12, sunX, sunY, h * .22);
+  glow.addColorStop(0, "#fff3d3"); glow.addColorStop(.2, "#ffdaac9c"); glow.addColorStop(1, "#ffefcc00");
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#fff0c5"; ctx.beginPath(); ctx.arc(sunX, sunY, h*.023, 0, 2*Math.PI); ctx.fill();
+
+  const tau = Math.PI * 2;
+  const ridge = (x, i) => {
+    const a = tau * x / w;
+    return h * (.442 + i * .023 + .017 * Math.sin(2*a + i) + .014 * Math.sin(5*a + i*2) +
+      .008 * Math.cos(9*a + i*.8) + .005 * Math.sin(17*a+i) + .002 * Math.cos(49*a+i*.4));
+  };
+  ["#a99791", "#918d91", "#687b82", "#476773"].forEach((color, i) => {
+    ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(0,h*.54);
+    for (let x=0;x<=w;x+=2) ctx.lineTo(x,Math.min(h*.537,ridge(x,i)));
+    ctx.lineTo(w,h*.54); ctx.closePath(); ctx.fill();
+  });
+  let seed = 113;
+  const random = () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
+  for (let i=0;i<2200;i++) {
+    const depth = random(), y = h*(.54 + depth*.46), x = random()*w;
+    const shine = Math.exp(-Math.pow((x-sunX) / (45+190*depth),2));
+    ctx.fillStyle = shine>.25 ? "rgba(255,213,164,"+(.22*shine)+")" : "rgba(221,229,220,.13)";
+    const length = (4+random()*28)*(1+depth*1.7);
+    ctx.fillRect(x,y,length, .7 + depth*2);
+  }
+  // The near shore provides foreground detail when looking east and west.
+  ctx.fillStyle = "#294952"; ctx.beginPath(); ctx.moveTo(0,h);
+  for (let x=0;x<=w;x+=3) {
+    const a = tau*x/w;
+    const y=h*(.85-.13*Math.cos(a-.4)+.052*Math.cos(a*3)+.014*Math.sin(a*8)+.005*Math.sin(a*31));
+    ctx.lineTo(x,y);
+  }
+  ctx.lineTo(w,h); ctx.closePath(); ctx.fill();
+  const blob = await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.94));
+  canvas.width=canvas.height=0;
+  if (!blob) throw new Error("無法建立範例圖檔。");
+  return blob;
+}
+
+
+const byId = id => document.getElementById(id);
+const ui = Object.fromEntries([
+  "street-form", "street-url", "paste-link", "quality", "start", "start-label", "cancel", "status", "progress",
+  "local-file", "demo", "source-map", "place-map", "preview-title", "preview-stage", "placeholder", "preview-photo",
+  "preview-canvas", "viewer-actions", "reset-view", "scene-name", "source-size", "output-size", "save",
+].map(id => [id, byId(id)]));
+let request = null;
+let loaded = null;
+let result = null;
+let previewUrl = null;
+let viewer = null;
+const initialTitle = ui["start-label"].textContent;
+const sizes = (w, h) => w.toLocaleString("en-US") + " × " + h.toLocaleString("en-US");
+const targetWidth = () => Number(ui.quality.value);
+
+function announce(message, error = false) {
+  ui.status.textContent = message;
+  ui.status.dataset.state = error ? "error" : "info";
+}
+function fallBackToPhoto() {
+  ui["preview-canvas"].hidden = true;
+  ui["viewer-actions"].hidden = true;
+  ui["preview-photo"].hidden = !previewUrl;
+}
+function clearResult() {
+  result = null;
+  ui["place-map"].hidden = true;
+  ui["place-map"].removeAttribute("href");
+  ui.save.disabled = true;
+  ui.placeholder.hidden = false;
+  ui["viewer-actions"].hidden = ui["preview-canvas"].hidden = ui["preview-photo"].hidden = true;
+  ui["preview-stage"].classList.remove("has-image");
+  ui["preview-photo"].removeAttribute("src");
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  previewUrl = null;
+  ui["scene-name"].textContent = "尚未載入";
+  ui["source-size"].textContent = "—";
+  ui["output-size"].textContent = "—";
+}
+function mapLink(url) {
+  ui["source-map"].hidden = !url;
+  if (url) ui["source-map"].href = url;
+  else ui["source-map"].removeAttribute("href");
+}
+function busy(active) {
+  ui.start.disabled = active;
+  ui.save.disabled = active || !result;
+  ui["start-label"].textContent = active ? "正在處理…" : initialTitle;
+  ui.cancel.hidden = !active;
+  ui.progress.hidden = !active;
+  ui["preview-stage"].setAttribute("aria-busy", String(active));
+  if (active) ui.progress.removeAttribute("value");
+}
+function interrupt() {
+  request?.abort();
+  request = null;
+  busy(false);
+}
+function progress(signal, percent, text) {
+  if (signal.aborted) return;
+  if (Number.isFinite(percent)) { ui.progress.max = 100; ui.progress.value = Math.min(100,Math.max(0,percent)); }
+  else ui.progress.removeAttribute("value");
+  announce(text);
+}
+async function present(blob, width, height, source, signal) {
+  const url = URL.createObjectURL(blob);
+  const image = new Image();
+  image.src = url;
+  try {
+    await image.decode();
+    if (signal.aborted) return;
+    if (image.naturalWidth !== width || image.naturalHeight !== height) throw new Error("輸出尺寸不符，請改選其他畫質。");
+    previewUrl = url;
+    ui["preview-photo"].src = url;
+    ui["preview-photo"].alt = source.title + "的全景展開圖";
+    ui.placeholder.hidden = true;
+    ui["preview-stage"].classList.add("has-image");
+    ui["preview-canvas"].hidden = false;
+    if (!viewer) viewer = createPanorama(ui["preview-canvas"], ui["reset-view"], fallBackToPhoto);
+    if (viewer?.load(image)) {
+      ui["viewer-actions"].hidden = false;
+      ui["preview-photo"].hidden = true;
+      viewer.draw();
+    } else fallBackToPhoto();
+    ui["scene-name"].textContent = source.title;
+    ui["source-size"].textContent = source.width && source.height ? sizes(source.width, source.height) : "未提供";
+    ui["output-size"].textContent = sizes(width, height);
+    result = { blob, width, title: source.title };
+    const note = source.width && source.width < width ? "，由較小的來源放大" : "";
+    announce("已完成 " + sizes(width, height) + " JPG" + note + "，可預覽或儲存。");
+  } finally {
+    if (previewUrl !== url) URL.revokeObjectURL(url);
+  }
+}
+async function run(makeSource) {
+  interrupt();
+  clearResult();
+  const handle = new AbortController();
+  const { signal } = handle;
+  request = handle;
+  busy(true);
+  announce("正在讀取全景…");
+  try {
+    const source = await makeSource();
+    if (signal.aborted) return;
+    if (source.kind === "place") {
+      loaded = null;
+      ui["place-map"].href = source.mapUrl;
+      ui["place-map"].hidden = false;
+      announce("已辨識這個地點。請開啟地圖，選取要下載的 360° 畫面，再把該畫面的完整網址貼回來。");
+      return;
+    }
+    loaded = source;
+    mapLink(source.mapUrl);
+    const width = targetWidth();
+    let blob;
+    if (source.remote) {
+      const image = await getStreetImage({ ...source.remote, title:source.title }, width, {
+        signal,
+        onProgress: value => {
+          const done = Number(value.completed) || 0, total = Number(value.total) || 0;
+          const step = value.stage === "tiles" && total ? "正在讀取街景影像 " + done + " / " + total : 
+            value.stage === "encode" ? "正在產生 JPG…" : "正在讀取指定街景…";
+          progress(signal, value.percent, step);
+        },
+      });
+      if (signal.aborted) return;
+      source.width = image.sourceWidth;
+      source.height = image.sourceHeight;
+      blob = image.blob;
+    } else {
+      progress(signal, 55, "正在產生 " + sizes(width,width/2) + " JPG…");
+      blob = await resizePhoto(source.blob, width, source);
+    }
+    if (signal.aborted) return;
+    progress(signal, 96, "正在準備預覽…");
+    await present(blob, width, width/2, source, signal);
+  } catch (error) {
+    if (!signal.aborted) {
+      clearResult();
+      const message = error instanceof Error ? error.message : "無法讀取這張全景，請重新載入。";
+      announce(message === "Failed to fetch" || message === "Load failed" ? "目前連不到影像來源。請確認網路，或改為匯入原始全景照片。" : message, true);
+    }
+  } finally {
+    if (request === handle) { request = null; busy(false); }
+  }
+}
+function startStreet() {
+  if (!ui["street-url"].value.trim()) {
+    ui["street-url"].focus(); announce("請先貼上 Google 地圖街景網址。", true); return;
+  }
+  loaded = null; mapLink(null);
+  run(() => {
+    const remote = parseStreetLink(ui["street-url"].value);
+    if (remote.kind === "place") return remote;
+    return { remote, mapUrl:remote.mapUrl, title:remote.title || (remote.lat != null && remote.lng != null ?
+      "街景 " + remote.lat.toFixed(5) + ", " + remote.lng.toFixed(5) : "街景 " + remote.panoId) };
+  });
+}
+ui.start.addEventListener("click", startStreet);
+ui["street-url"].addEventListener("keydown", event => {
+  if (event.key === "Enter" && !event.isComposing) { event.preventDefault(); startStreet(); }
+});
+ui["street-form"].addEventListener("submit", event => { event.preventDefault(); startStreet(); });
+function inputChanged() {
+  interrupt();
+  clearResult();
+  loaded = null; mapLink(null); announce("");
+}
+ui["street-url"].addEventListener("input", inputChanged);
+ui["paste-link"].addEventListener("click", async () => {
+  try {
+    const value = await navigator.clipboard.readText();
+    if (!value.trim()) throw new Error("empty");
+    ui["street-url"].value = value.trim();
+    inputChanged(); ui["street-url"].focus();
+  } catch {
+    ui["street-url"].focus();
+    announce("請在網址欄貼上連結。電腦可按 ⌘V 或 Ctrl+V，手機可長按後選擇貼上。");
+  }
+});
+ui.cancel.addEventListener("click", () => { interrupt(); announce("已取消。"); });
+ui.quality.addEventListener("change", () => {
+  if (loaded) { const source = loaded; run(() => source); }
+});
+ui.demo.addEventListener("click", () => {
+  loaded = null; mapLink(null); ui["street-url"].value = "";
+  run(async () => ({ blob: await makeDemoPhoto(), title:"湖畔暮色（示範插畫）", width:4096, height:2048 }));
+});
+ui["local-file"].addEventListener("change", () => {
+  const file = ui["local-file"].files?.[0];
+  ui["local-file"].value = "";
+  if (!file) return;
+  loaded = null; mapLink(null); ui["street-url"].value = "";
+  run(async () => {
+    const entry = await photoFromBlob(file, file.name.replace(/\.[^.]+$/, ""));
+    URL.revokeObjectURL(entry.preview);
+    return { title:entry.title, width:entry.width, height:entry.height, blob:entry.blob };
+  });
+});
+ui.save.addEventListener("click", () => {
+  if (!result) return;
+  savePhoto(result.blob, {title:result.title}, result.width);
+  announce("已送出 JPG 下載，檔案名稱包含輸出寬度 " + result.width + "。");
+});
+window.addEventListener("pagehide", () => { request?.abort(); });
+
+document.querySelector(".help-link").addEventListener("click", () => { byId("help").open = true; });
+
+})();
+</script>
+</body>
+</html>
