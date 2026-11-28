@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#17483c"><meta name="description" content="將自己的音檔轉成主旋律五線譜與吉他六線譜，對照原音試聽、練習與匯出。">
+<title>拾音譜｜吉他轉譜工作室</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar"><div class="frame top-inner">
+<div class="brand"><span class="brandmark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="brandname">拾音譜 <span>FRETLEAF STUDIO</span></div></div>
+<button class="help-btn" id="help"><i data-icon="help"></i>使用說明</button></div></header>
+<main class="frame">
+<div class="intro"><div><h1>吉他轉譜工作室</h1><p>匯入一段音樂，對照五線譜與吉他六線譜練習。</p></div>
+<button class="primary" id="openImport"><i data-icon="upload"></i>匯入音檔</button></div>
+<section class="deck" aria-labelledby="trackTitle">
+<div class="sleeve" aria-hidden="true"><div class="disc"></div><img alt="" src="cover.webp" width="132" height="132" id="cover"></div>
+<div class="deck-content"><div class="deck-top"><div class="track-info"><div class="source-label" id="sourceLabel">預編範例</div><h2 id="trackTitle">午後的練習曲</h2></div>
+<div class="listen-tabs" role="group" aria-label="試聽音源"><button id="original" aria-pressed="true">原音</button><button id="melody" aria-pressed="false">轉譜旋律</button></div></div>
+<div class="timeline"><canvas id="wave" aria-hidden="true"></canvas><input id="seek" type="range" min="0" max="1" step=".01" value="0" aria-label="播放位置"></div>
+<div class="transport"><button class="play" id="play" aria-label="播放" title="播放"><i data-icon="play"></i></button><span id="clock">0:00</span><span class="slash">/</span><span id="endTime">0:21</span><div class="speed"><i data-icon="speed"></i><select id="rate" aria-label="播放速度"><option value=".5">0.5×</option><option value=".75">0.75×</option><option selected value="1">1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select><i data-icon="chevron"></i></div></div></div>
+</section>
+<div id="liveMessage" role="status" aria-live="polite"></div>
+<section class="score-section" aria-labelledby="sectionTitle"><div class="score-tools">
+<h2 id="sectionTitle"><i data-icon="score"></i>樂譜預覽</h2>
+<div class="score-actions"><div class="seg" role="group" aria-label="譜面顯示"><button data-view="both" aria-pressed="true">合併譜</button><button data-view="staff" aria-pressed="false">五線譜</button><button data-view="tab" aria-pressed="false">六線譜</button></div>
+<div class="export-wrap"><button id="exportBtn" class="outline" aria-expanded="false"><i data-icon="download"></i>匯出樂譜<i data-icon="chevron"></i></button>
+<div class="menu" id="exportMenu" hidden><button id="xml"><i data-icon="file"></i>下載 MusicXML</button><button id="print"><i data-icon="print"></i>列印／另存 PDF</button></div></div></div></div>
+<article class="paper">
+<div class="paper-head"><div><div class="paper-caption"><span class="short-rule"></span><span id="sheetType">吉他合併譜</span></div><h2 id="scoreTitle">午後的練習曲</h2></div><div class="paper-mark" aria-hidden="true"><i data-icon="tune"></i></div></div>
+<div class="sheet-meta"><span id="tempoValue">♩ = 92</span><span>4/4 拍</span><span>標準調弦 <b>E A D G B E</b></span></div>
+<div class="score-content" id="score" aria-label="樂譜內容"></div>
+<div class="paper-foot"><span id="count"></span><span id="footInfo">預先編譜的原創範例</span></div>
+</article></section>
+</main>
+<dialog id="importDlg"><form method="dialog" class="dialog-head"><h2>匯入音檔</h2><button class="icon-btn" aria-label="關閉"><i data-icon="x"></i></button></form>
+<p class="description">選擇旋律清楚的錄音，產生五線譜與吉他六線譜。音檔只在您的裝置上分析。</p>
+<button id="drop" class="drop"><span class="drop-icon"><i data-icon="upload"></i></span><strong id="fileLabel">選擇或拖入音檔</strong><span>MP3、WAV、M4A、OGG · 依瀏覽器解碼能力</span></button>
+<input id="pickFile" type="file" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac,.flac" hidden>
+<label for="bpm" class="field">曲速 BPM <small>選填</small></label><input id="bpm" type="number" min="30" max="300" step="1" placeholder="自動估算">
+<div id="importStatus" role="status" aria-live="polite"></div><progress id="progress" value="0" max="1" hidden></progress>
+<div class="dialog-actions"><button class="outline" id="cancelImport">取消</button><button class="primary" id="analyze" disabled><i data-icon="notes"></i>開始轉譜</button></div></dialog>
+<dialog id="helpDlg"><form method="dialog" class="dialog-head"><h2>使用說明</h2><button class="icon-btn" aria-label="關閉"><i data-icon="x"></i></button></form>
+<h3>從自己的錄音開始</h3><p>按「匯入音檔」，選擇 MP3，再按「開始轉譜」。哼唱、單音吉他或主旋律清晰的片段最容易辨認。多樂器混音會受到和聲、鼓聲與人聲影響。</p>
+<h3>對照音符和指法</h3><p>按播放鍵，在「原音」與「轉譜旋律」間切換。點選音符或拖曳波形可從指定位置練習。降低播放速度時，原音的音高會隨之降低，轉譜旋律維持原音高。六線譜最上方是第 1 弦，數字代表琴格，0 代表空弦。</p>
+<h3>讀譜與匯出</h3><p>系統以 4/4 拍整理音符，和弦名稱只標示能估計的位置。吉他五線譜依慣例高記八度，和六線譜彈出相同的音。可下載 MusicXML 繼續編輯，或用列印功能存成 PDF。</p>
+<button class="outline" id="loadDemo"><i data-icon="play"></i>載入示範曲</button></dialog>
+<script src="demo-score.js"></script><script src="notation.js"></script><script src="audio.js"></script><script src="app.js"></script></body></html>
