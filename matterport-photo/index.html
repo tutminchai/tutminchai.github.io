@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matterport 照片匯出</title>
+<style>
+:root{font:16px/1.55 system-ui,sans-serif;color:#162b26;background:#f2f5f0}
+*{box-sizing:border-box}body{margin:0}main{width:min(1120px,94%);margin:2rem auto}
+h1{margin:0;font-size:clamp(1.65rem,4vw,2.6rem)}p{margin:.65rem 0 1.25rem}
+form{display:grid;gap:.8rem;grid-template-columns:2fr 1fr auto;align-items:end}
+label{display:grid;gap:.3rem;font-weight:600}input,button,a.download{font:inherit;border-radius:8px;padding:.65rem .8rem}
+input{width:100%;border:1px solid #82948a;background:white}
+button,a.download{border:1px solid #164d40;background:#164d40;color:white;cursor:pointer;text-decoration:none}
+button:disabled{opacity:.45;cursor:default}iframe{width:100%;height:clamp(330px,57vh,680px);border:0;border-radius:12px;background:#132421}
+.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.65rem}
+#status{min-height:1.55em;margin:.8rem 0}a{color:#164d40}img{display:block;max-width:100%;max-height:480px;margin:1rem 0;border-radius:8px}
+[hidden]{display:none!important}@media(max-width:680px){form{grid-template-columns:1fr}main{margin:1rem auto}}
+</style>
+<main>
+<h1>Matterport 照片匯出</h1>
+<p>在導覽中走到要取景的位置，再擷取目前視角或掃描點的 360° 全景。</p>
+<form id="load">
+<label>Matterport 分享網址<input id="link" type="url" required value="https://my.matterport.com/show/?m=rByYZcVB1HH"></label>
+<label>Matterport SDK Key<input id="key" type="password" autocomplete="off" spellcheck="false"></label>
+<button>載入導覽</button>
+</form>
+<p>匯出需要已允許 <strong>tutminchai.github.io</strong> 的 Matterport SDK Key。請使用有權匯出的空間。</p>
+<iframe id="viewer" title="Matterport 空間導覽" allow="fullscreen; xr-spatial-tracking" allowfullscreen src="https://my.matterport.com/show/?m=rByYZcVB1HH&play=1"></iframe>
+<div class="actions">
+<button id="flat" type="button" disabled>擷取目前視角</button>
+<button id="pano" type="button" disabled>擷取 360° 全景</button>
+<a class="download" id="download" hidden download>下載 JPG</a>
+</div>
+<p id="status" role="status">可先查看 LT101。輸入 SDK Key 後，按「載入導覽」啟用匯出。</p>
+<img id="preview" hidden alt="擷取的照片預覽">
+</main>
+<script type="module">
+const element = id => document.getElementById(id);
+const form = element("load");
+const viewer = element("viewer");
+const flat = element("flat");
+const pano = element("pano");
+const preview = element("preview");
+const download = element("download");
+const status = element("status");
+let sdk;
+let modelId;
+function setCaptureEnabled(enabled) {
+  flat.disabled = !enabled;
+  pano.disabled = !enabled;
+}
+function clearCapture() {
+  preview.hidden = true;
+  preview.removeAttribute("src");
+  download.hidden = true;
+  download.removeAttribute("href");
+}
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+  const url = new URL(element("link").value);
+  const id = url.searchParams.get("m");
+  if (url.origin !== "https://my.matterport.com" || !/^\/show\/?$/.test(url.pathname) || !/^[A-Za-z0-9]{11}$/.test(id || "")) {
+    status.textContent = "請輸入有效的 Matterport Showcase 分享網址。";
+    return;
+  }
+  const key = element("key").value.trim();
+  const submit = form.querySelector("button");
+  submit.disabled = true;
+  setCaptureEnabled(false);
+  clearCapture();
+  sdk = undefined;
+  const showcase = new URL("https://my.matterport.com/show/");
+  showcase.searchParams.set("m", id);
+  showcase.searchParams.set("play", "1");
+  if (key) showcase.searchParams.set("applicationKey", key);
+  viewer.src = showcase.href;
+  try {
+    if (!key) {
+      status.textContent = "已開啟導覽。輸入 SDK Key 後可啟用照片匯出。";
+      return;
+    }
+    status.textContent = "正在連線。若導覽顯示播放按鈕，請先點擊播放。";
+    const bootstrap = new URL("https://api.matterport.com/sdk/bootstrap/3.0.0-0-g0517b8d76c/sdk.es6.js");
+    bootstrap.searchParams.set("applicationKey", key);
+    let timeout;
+    try {
+      const session = (async () => {
+        const { connect } = await import(bootstrap.href);
+        const connected = await connect(viewer);
+        await connected.Model.getData();
+        return connected;
+      })();
+      sdk = await Promise.race([session, new Promise((_, reject) => {
+        timeout = setTimeout(() => reject(new Error("SDK connection timed out")), 25000);
+      })]);
+    } finally {
+      clearTimeout(timeout);
+    }
+    modelId = id;
+    setCaptureEnabled(true);
+    status.textContent = "已連線。走到想取景的位置，再選擇擷取方式。";
+  } catch {
+    status.textContent = "無法啟用匯出。請確認空間可在此頁播放，且 SDK Key 已允許此網域，再重試。";
+  } finally {
+    submit.disabled = false;
+  }
+});
+async function capture(isPanorama) {
+  const submit = form.querySelector("button");
+  submit.disabled = true;
+  setCaptureEnabled(false);
+  clearCapture();
+  status.textContent = "正在產生 JPG…";
+  try {
+    const image = isPanorama
+      ? await sdk.Renderer.takeEquirectangular()
+      : await sdk.Renderer.takeScreenShot({width:1920,height:1080});
+    if (typeof image !== "string" || !/^data:image\/jpeg;base64,/i.test(image)) throw new Error("Invalid JPEG");
+    preview.src = image;
+    await preview.decode();
+    download.href = image;
+    download.download = modelId + (isPanorama ? "-360-" : "-view-") + Date.now() + ".jpg";
+    preview.hidden = false;
+    download.hidden = false;
+    status.textContent = "已產生 " + preview.naturalWidth + " × " + preview.naturalHeight + " JPG。";
+  } catch {
+    status.textContent = isPanorama
+      ? "無法擷取全景。請先走進室內的掃描點，等畫面載入後重試。"
+      : "無法擷取目前視角。請等畫面載入後重試。";
+  } finally {
+    submit.disabled = false;
+    setCaptureEnabled(true);
+  }
+}
+flat.onclick = () => capture(false);
+pano.onclick = () => capture(true);
+</script>
+</html>
