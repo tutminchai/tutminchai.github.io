@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f9faf8"><title>形作室｜圖片轉 3D 模型</title><link rel="stylesheet" href="./studio.css"></head>
+<body>
+<header class="top"><div class="topin"><div class="identity"><span class="brandicon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M16 3 28 10v13l-12 7L4 23V10Z M4 10l12 7 12-7 M16 17v13 M10 7l12 7v7l-6 3.5"/></svg></span><span class="brandname">形作室</span><span class="wordmark">FORMFRAME</span></div><button type="button" id="guide" class="help"><span data-icon="help"></span>使用說明</button></div></header>
+<main>
+<div class="intro"><h1>圖片轉 3D 模型</h1><p>從一張圖片建立帶有貼圖的立體模型，旋轉檢視後下載。</p></div>
+<div class="workbench">
+<section class="settings panel" aria-labelledby="source-title">
+<div class="sectiontitle"><span data-icon="image"></span><h2 id="source-title">來源圖片</h2><button id="example" type="button" class="text-btn">載入範例</button></div>
+<input class="fileinput" id="input-file" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,image/heic-sequence,image/heif-sequence,.png,.jpg,.jpeg,.webp,.heic,.heif">
+<button type="button" id="drop" class="drop"><span class="uploadicon" data-icon="upload"></span><strong>選擇或拖放圖片</strong><span>PNG、JPG、WebP、HEIC／HEIF · 最大 20 MB</span></button>
+<div class="fileinfo"><div class="thumb"><img id="thumb" alt="來源圖片縮圖"></div><div><strong id="filename">載入範例中…</strong><small id="filemeta"></small></div></div>
+<div class="divider"></div>
+<div class="sectiontitle"><span data-icon="sliders"></span><h2>建模設定</h2></div>
+<label for="mode" class="fieldlabel">建模方式</label><div class="selectwrap"><select id="mode">
+<option value="ai">AI 立體重建 · TripoSR</option><option value="inflate">輪廓膨形 · 插畫、角色</option><option value="lathe" selected>旋轉成形 · 瓶罐、陶器</option><option value="relief">影像浮雕 · 圖案、徽章</option></select><span data-icon="chevron"></span></div>
+<p id="mode-note" class="note"></p>
+<details id="tuning"><summary>調整參數<span data-icon="chevron"></span></summary><div class="tuning-fields">
+<div id="depth-row"><label class="rangetitle" for="depth">立體深度 <output id="depthout">55%</output></label><input type="range" id="depth" min="10" max="100" value="55" step="5"></div>
+<div id="detail-row"><label class="rangetitle" for="quality">網格細緻度 <output id="qualityout">80</output></label><input type="range" id="quality" min="32" max="128" value="80" step="8"></div>
+<label class="check"><input type="checkbox" id="background" checked> 移除單色背景</label></div></details>
+<button type="button" id="generate" class="primary"><span data-icon="cube"></span><span id="genlabel">建立 3D 模型</span></button>
+<div id="task-msg" class="task-msg" role="status" aria-live="polite"></div><progress id="progress" hidden max="1"></progress>
+<button id="cancel" type="button" hidden>取消重建</button>
+</section>
+<div class="results">
+<section class="panel preview" aria-labelledby="view-title"><div class="viewhead"><div class="sectiontitle"><span data-icon="cube"></span><h2 id="view-title">模型預覽</h2></div><div class="viewtools">
+<button type="button" id="wire" title="顯示線框" aria-label="顯示線框" aria-pressed="false"><span data-icon="mesh"></span></button>
+<button type="button" id="rotate" title="自動旋轉" aria-label="自動旋轉" aria-pressed="false"><span data-icon="orbit"></span></button>
+<button type="button" id="reset" title="重設視角" aria-label="重設視角"><span data-icon="reset"></span></button>
+</div></div>
+<div class="stage"><canvas id="viewport" aria-label="互動模型預覽，拖曳旋轉或使用方向鍵，滾輪或加減鍵縮放"></canvas><div class="stage-caption"><span class="mark"></span><span id="stage-name">陶瓶範例</span></div><span class="stage-counter" id="counter"></span><div id="empty" class="stage-empty" hidden><span data-icon="cube"></span><strong id="empty-label">準備建立模型</strong></div><div id="stagehelp"><span data-icon="orbit"></span>拖曳旋轉<span class="dot">·</span>滾輪或雙指縮放</div></div>
+</section>
+<section class="panel export" aria-labelledby="export-title"><div class="sectiontitle"><span data-icon="download"></span><h2 id="export-title">匯出模型</h2></div>
+<div class="height-field"><label for="model-height">匯出高度</label><input id="model-height" type="number" inputmode="decimal" min="0.1" max="10000" step="any" value="20"><span>公分</span></div>
+<div class="exportline"><div role="group" aria-label="選擇匯出格式" class="formats"><button data-format="glb" aria-pressed="true">GLB</button><button data-format="obj" aria-pressed="false">OBJ</button><button data-format="fbx" aria-pressed="false">FBX</button><button data-format="usdz" aria-pressed="false">USDZ</button></div><button id="download" class="download" disabled><span data-icon="download"></span>下載 <b id="extension">GLB</b></button></div><p class="note format-note" id="format-desc"></p><div id="export-msg" class="task-msg" role="status" aria-live="polite"></div>
+</section></div></div>
+</main>
+<dialog id="guide-dialog"><div class="sectiontitle"><span data-icon="help"></span><h2>使用說明</h2><button type="button" id="close-guide" class="text-btn">關閉</button></div>
+<ol><li><strong>選一張主體清楚的圖片。</strong> 可直接拖入 iPhone 的 HEIC 照片，物件四周留些空白。透明 PNG 最容易保留正確輪廓，有複雜背景的照片可先去背。</li><li><strong>選擇建模方式。</strong> 需要推估人物、玩具或動物的側面與背面時，選 AI 立體重建。旋轉成形適合左右對稱的陶器；輪廓膨形和浮雕可把插圖做成立體素材。</li><li><strong>建立模型並旋轉檢查。</strong> 拖曳預覽即可轉動，滾輪或雙指可縮放。調整參數後請重新建立。</li><li><strong>選格式下載。</strong> 可自行設定匯出高度，預設為 20 公分。 網頁與 WebAR 可選 GLB，3D 軟體可選 FBX，Apple 裝置的 AR 預覽可選 USDZ。OBJ 請解壓縮並將模型、材質與貼圖放在同一資料夾。</li></ol>
+<p class="guide-note">圖片會留在瀏覽器內。AI 模式首次使用需連網下載約 515 MB（含模型權重及運算元件），並啟用 WebGPU；其他三種方式直接在瀏覽器內運算。單張圖片看不到的部位由 AI 推估，快速模式則依輪廓、亮度或旋轉軸建立幾何。</p>
+</dialog>
+<script type="module" src="./studio.js"></script></body></html>

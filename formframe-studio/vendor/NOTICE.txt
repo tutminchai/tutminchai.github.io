@@ -1,0 +1,9 @@
+形作室的 HEIC／HEIF 照片解碼使用 heic-to 1.6.7，其瀏覽器版本包含 libheif 1.23.7。此第三方程式依 LGPL 第 3 版或其後版本發行。附錄包含原始授權及其引用的 GPL 第 3 版條款。
+
+heic-to 版本 1.6.7 原始碼、libheif JavaScript 與建置說明
+https://github.com/hoppergee/heic-to/tree/78345a3fcdb4a1d70d513fce2646aeff0127f7ba
+
+封裝使用該版本未修改的 dist/iife/heic-to.js，Git blob 3954b65444fa867b2ae695851516efaa56b04544。
+https://github.com/hoppergee/heic-to/blob/78345a3fcdb4a1d70d513fce2646aeff0127f7ba/dist/iife/heic-to.js
+
+單檔版保留可替換的解碼器。若要更新，請將相容的 heic-to.js 轉為 Base64 後，替換 HTML 中 id="heic-codec" 元素的內容。也可移除該元素，並將相容的解碼器放在 HTML 旁的 vendor/heic-to.js。
